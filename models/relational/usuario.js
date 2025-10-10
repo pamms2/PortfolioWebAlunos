@@ -10,7 +10,7 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: false
         },
-        email: {
+        login: {
             type: Sequelize.STRING,
             allowNull: false,
             unique: true

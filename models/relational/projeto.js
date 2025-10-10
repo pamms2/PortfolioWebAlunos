@@ -17,7 +17,7 @@ module.exports = (sequelize, Sequelize) => {
         link: {
             type: Sequelize.STRING,
             allowNull: false
-        }
+        },
     });
     return Projeto;
 }

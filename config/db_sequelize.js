@@ -1,66 +1,58 @@
 const Sequelize = require('sequelize');
 const sequelize = new Sequelize('dbProjeto', 'postgres', '1234', {
-        host: 'localhost',
-        dialect: 'postgres'
-    });
+    host: 'localhost',
+    dialect: 'postgres'
+});
 
-var db ={};
+var db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-//importando os modelos
-db.Usuario = require('../models/usuario.js')(sequelize, Sequelize);
-db.Aluno = require('../models/aluno.js')(sequelize, Sequelize);
-db.Projeto = require('../models/projeto.js')(sequelize, Sequelize);
-db.PalavraChave = require('../models/palavraChave.js')(sequelize, Sequelize);
-db.Conhecimento = require('../models/conhecimento.js')(sequelize, Sequelize);
+// Importando os modelos
+db.Usuario = require('../models/relational/usuario.js')(sequelize, Sequelize);
+db.Projeto = require('../models/relational/projeto.js')(sequelize, Sequelize);
+db.PalavraChave = require('../models/relational/palavraChave.js')(sequelize, Sequelize);
+db.Conhecimento = require('../models/relational/conhecimento.js')(sequelize, Sequelize);
+db.UsuarioProjeto = require('../models/relational/usuarioProjeto.js')(sequelize, Sequelize);
+db.PalavraChaveProjeto = require('../models/relational/palavraChaveProjeto.js')(sequelize, Sequelize);
+db.UsuarioConhecimento = require('../models/relational/usuarioConhecimento.js')(sequelize, Sequelize);
 
-//relacionamentos
+// Relacionamentos
 
-//1:1 usuário -> aluno
-db.Usuario.hasOne(db.Aluno, {
+// N:M usuário <-> projeto
+db.Usuario.belongsToMany(db.Projeto, {
+    through: db.UsuarioProjeto,
     foreignKey: 'usuarioId',
-    onDelete: 'CASCADE'
-});
-db.Aluno.belongsTo(db.Usuario, {
-    foreignKey: 'usuarioId',
-    allowNull: false
-});
-
-//N:M aluno -> projeto
-db.Aluno.belongsToMany(db.Projeto, {
-    through: 'AlunoProjeto',
-    foreignKey: 'alunoId',
     otherKey: 'projetoId'
 });
-db.Projeto.belongsToMany(db.Aluno, {
-    through: 'AlunoProjeto',
+db.Projeto.belongsToMany(db.Usuario, {
+    through: db.UsuarioProjeto,
     foreignKey: 'projetoId',
-    otherKey: 'alunoId'
+    otherKey: 'usuarioId'
 });
 
-//N:M palavra-chave <-> projeto
+// N:M palavra-chave <-> projeto
 db.Projeto.belongsToMany(db.PalavraChave, {
-    through: 'ProjetoPalavraChave',
+    through: db.PalavraChaveProjeto,
     foreignKey: 'projetoId',
     otherKey: 'palavraChaveId'
 });
 db.PalavraChave.belongsToMany(db.Projeto, {
-    through: 'ProjetoPalavraChave',
+    through: db.PalavraChaveProjeto,
     foreignKey: 'palavraChaveId',
     otherKey: 'projetoId'
 });
 
-//N:M conhecimento <-> aluno
-db.Aluno.belongsToMany(db.Conhecimento, {
-    through: 'AlunoConhecimento',
-    foreignKey: 'alunoId',
+// N:M conhecimento <-> usuário
+db.Usuario.belongsToMany(db.Conhecimento, {
+    through: db.UsuarioConhecimento,
+    foreignKey: 'usuarioId',
     otherKey: 'conhecimentoId'
 });
-db.Conhecimento.belongsToMany(db.Aluno, {
-    through: 'AlunoConhecimento',
+db.Conhecimento.belongsToMany(db.Usuario, {
+    through: db.UsuarioConhecimento,
     foreignKey: 'conhecimentoId',
-    otherKey: 'alunoId'
+    otherKey: 'usuarioId'
 });
 
 module.exports = db;
