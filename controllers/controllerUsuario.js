@@ -1,5 +1,6 @@
 const db = require('../config/db_sequelize');
 const { Op } = require('sequelize');
+const bcrypt = require('bcryptjs');
 
 module.exports = {
     //renderiza a página de login
@@ -17,28 +18,36 @@ module.exports = {
     //conexão com a conta
     async postLogin(req, res) {
         try {
-            const{email, senha} = req.body;
-            const usuario = await db.Usuario.findOne({where: {email, senha}});
+            const{login, senha} = req.body;
 
-            //usuário válido
-            if(usuario) {
-                req.session.login = usuario.nome;
-                req.session.tipo = usuario.tipo;
+            const usuario = await db.Usuario.findOne({where: {login}});
 
-                res.cookie('userData', {nome: usuario.nome, tipo: usuario.tipo}, {
-                    maxAge: 30 * 60 * 1000,
-                    httpOnly: true
-                });
-
-                res.locals.login = usuario.nome;
-                res.locals.admin = (usuario.tipo === 'admin');
-
-                res.redirect('/home');
-
-            //usuário inválido
-            } else {
-                res.redirect('/');
+            //usuário não encontrado
+            if(!usuario) {
+                console.log('Usuário não encontrado');
+                return res.redirect('/');
             }
+
+            const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
+
+            if (!senhaCorreta) {
+                console.log('Senha incorreta');
+                return res.redirect('/');
+            }
+
+            //login bem-sucedido
+            req.session.login = usuario.login;
+            req.session.tipo = usuario.tipo;
+
+            res.cookie('userData', JSON.stringify({ nome: usuario.nome, tipo: usuario.tipo }), {
+                maxAge: 30 * 60 * 1000,
+                httpOnly: true
+            });
+
+            res.locals.login = usuario.nome;
+            res.locals.admin = (usuario.tipo === 'admin');
+
+            res.redirect('/home');
         } catch(err) {
             console.error('Erro no login:', err);
             res.redirect('/');
@@ -59,7 +68,18 @@ module.exports = {
     //cria conta
     async postCreate(req, res) {
         try {
-            await db.Usuario.create(req.body);
+            const { nome, login, senha, tipo } = req.body;
+
+            // gera o hash antes de salvar
+            const hashSenha = await bcrypt.hash(senha, 10);
+
+            await db.Usuario.create({
+                nome,
+                login,
+                senha: hashSenha,
+                tipo
+            });
+
             res.redirect('/listaUsuarios');
         } catch (err) {
             console.error(err);
@@ -72,7 +92,7 @@ module.exports = {
         try {
             const nome = (req.query.nome || '').trim();
             const tipo = (req.query.tipo || '').trim();
-            const email = (req.query.email || '').trim();
+            const login = (req.query.login || '').trim();
             const pagina = parseInt(req.query.page, 10) || 1;
             const limite = 5;
             const offset = (pagina - 1) * limite;
@@ -82,10 +102,10 @@ module.exports = {
             const nameOp = (dialect === 'postgres') ? Op.iLike : Op.like;
 
             if (nome) where.nome = { [nameOp]: `%${nome}%` };
-            if (tipo) where.tipo = tipo; 
-            if (email) where.email = { [nameOp]: `%${email}%` };
+            if (tipo) where.tipo = tipo;
+            if (login) where.login = { [nameOp]: `%${login}%`};
 
-            const tipos = db.Usuario.rawAttributes.tipo.values; 
+            const tipos = db.Usuario.rawAttributes.tipo.values;
 
             const { rows: usuariosRaw, count: totalItens } = await db.Usuario.findAndCountAll({
                 where,
@@ -102,7 +122,7 @@ module.exports = {
                 tipos,
                 filtroNome: nome,
                 filtroTipo: tipo,
-                filtroEmail: email,
+                filtroLogin: login,
                 paginaAtual: pagina,
                 totalPaginas
             });
@@ -129,7 +149,14 @@ module.exports = {
     //atualiza usuário
     async postUpdate(req, res) {
         try {
-            await db.Usuario.update(req.body, { where: { id: req.body.id } });
+            const { id, nome, login, senha, tipo } = req.body;
+            const updateData = { nome, login, tipo };
+
+            if (senha && senha.trim() !== '') {
+                updateData.senha = await bcrypt.hash(senha, 10);
+            }
+
+            await db.Usuario.update(updateData, { where: { id } });
             res.redirect('/listaUsuarios');
         } catch (err) {
             console.error(err);
