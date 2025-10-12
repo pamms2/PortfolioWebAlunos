@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Portfólio Web Alunos</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>​
+
+    <link rel="stylesheet" type="text/css" href="../css/estilo.css">
+</head>​
+
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <nav class="sidebar bg-light">
+            <h5 class="sidebar-title text-center py-3 border-bottom">Menu</h5>
+            <ul class="nav flex-column">
+
+                <!-- Usuário -->
+                {{#if aluno}}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/usuario/visualizar">Usuário</a>
+                    </li>
+                {{/if}}
+
+                {{#if admin}}
+                    <li class="nav-item">
+                        <a href="#submenuUsuario" data-toggle="collapse" class="nav-link dropdown-toggle">Usuário</a>
+                        <ul class="collapse list-unstyled ml-3" id="submenuUsuario">
+                            <li><a href="/usuario/cadastrar" class="nav-link">Cadastrar</a></li>
+                            <li><a href="/usuario/listar" class="nav-link">Listar</a></li>
+                        </ul>
+                    </li>
+                {{/if}}
+
+                <!-- Projeto -->
+                {{#if aluno}}
+                    <li class="nav-item">
+                        <a href="#submenuProjeto" data-toggle="collapse" class="nav-link dropdown-toggle">Projeto</a>
+                        <ul class="collapse list-unstyled ml-3" id="submenuProjeto">
+                            <li><a href="/projeto/cadastrar" class="nav-link">Cadastrar</a></li>
+                            <li><a href="/projeto/listar" class="nav-link">Listar</a></li>
+                        </ul>
+                    </li>
+                {{/if}}
+
+                {{#if externo}}
+                    <li class="nav-item">
+                        <a href="/projeto/listar" class="nav-link">Projeto</a>
+                    </li>
+                {{/if}}
+
+                <!-- Conhecimento -->
+                {{#if admin}}
+                    <li class="nav-item">
+                        <a href="#submenuConhecimento" data-toggle="collapse" class="nav-link dropdown-toggle">Conhecimento</a>
+                        <ul class="collapse list-unstyled ml-3" id="submenuConhecimento">
+                            <li><a href="/conhecimento/cadastrar" class="nav-link">Cadastrar</a></li>
+                            <li><a href="/conhecimento/listar" class="nav-link">Listar</a></li>
+                        </ul>
+                    </li>
+                {{else}}
+                    <li class="nav-item">
+                        <a href="/conhecimento/listar" class="nav-link">Conhecimento</a>
+                    </li>
+                {{/if}}
+
+                <!-- Palavra-chave -->
+                {{#if admin}}
+                    <li class="nav-item">
+                        <a href="#submenuPalavra" data-toggle="collapse" class="nav-link dropdown-toggle">Palavra-chave</a>
+                        <ul class="collapse list-unstyled ml-3" id="submenuPalavra">
+                            <li><a href="/palavra/cadastrar" class="nav-link">Cadastrar</a></li>
+                            <li><a href="/palavra/listar" class="nav-link">Listar</a></li>
+                        </ul>
+                    </li>
+                {{/if}}
+            </ul>
+        </nav>
+
+        <!-- Conteúdo principal -->
+        <div class="content flex-grow-1 p-4">
+            {{{body}}}
+        </div>
+    </div>
+</body>
+</html>
+
+</html>

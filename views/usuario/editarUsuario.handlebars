@@ -1,0 +1,20 @@
+<form action="/editarUsuario" method="post">
+    <input type="hidden" name="id" value={{usuario.id}}>
+    <div class="form-group">
+        <label for="inputNome">Nome</label>
+        <input type="text" class="form-control" id="inputNome" name="nome" value="{{usuario.nome}}">
+    </div>
+    <div class="form-group">
+        <label for="inputLogin">Login</label>
+        <input type="text" class="form-control" id="inputLogin" name="login" value="{{usuario.login}}">
+    </div>
+    <div class="form-group">
+        <label for="inputSenha">Senha</label>
+        <input type="text" class="form-control" id="inputSenha" name="senha"  value="{{usuario.senha}}">
+    </div>
+    <div class="form-group">
+        <label for="inputTipo">Tipo</label>
+        <input type="number" class="form-control" id="inputTipo" name="tipo"  value="{{usuario.tipo}}">
+    </div>
+    <button type="submit" class="btn btn-primary">Editar</button>
+</form>
