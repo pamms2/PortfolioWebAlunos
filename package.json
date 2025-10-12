@@ -1,12 +1,17 @@
 {
   "dependencies": {
-    "bcryptjs": "^3.0.2"
+    "bcryptjs": "^3.0.2",
+    "express": "^5.1.0",
+    "express-handlebars": "^8.0.3",
+    "mongoose": "^8.19.1",
+    "multer": "^2.0.2",
+    "pg": "^8.16.3",
+    "sequelize": "^6.37.7"
   },
   "name": "portfoliowebalunos",
   "version": "1.0.0",
   "description": "O projeto consiste em um sistema web que funcionará como um portfólio digital de todos os alunos do Curso de Bacharelado em Engenharia de Software.",
   "main": "app.js",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,7 +23,7 @@
   "author": "Pamela Berti Braz <pbraz@alunos.utfpr.edu.br> (https://github.com/pamms2)",
   "contributors": [
     "Josiane Mariane Batista <josianebatista@alunos.utfpr.edu.br> (https://github.com/josibatista)"
-    ],
+  ],
   "bugs": {
     "url": "https://github.com/pamms2/PortfolioWebAlunos/issues"
   },
