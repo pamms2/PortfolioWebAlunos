@@ -58,7 +58,7 @@ module.exports = {
     async getCreate(req, res) {
         try {
             const tipos = db.Usuario.rawAttributes.tipo.values;
-            res.render('usuario/criacaoUsuario', { tipos });
+            res.render('usuario/cadastrarUsuario', { tipos });
         } catch (err) {
             console.error(err);
             res.status(500).send('Erro ao carregar a página de criação');
@@ -80,7 +80,7 @@ module.exports = {
                 tipo
             });
 
-            res.redirect('/listaUsuarios');
+            res.redirect('/listarUsuario');
         } catch (err) {
             console.error(err);
             res.status(500).send('Erro ao criar usuário');
@@ -117,7 +117,7 @@ module.exports = {
             const usuarios = usuariosRaw.map(u => u.toJSON());
             const totalPaginas = Math.ceil(totalItens / limite);
 
-            res.render('usuario/listaUsuarios', {
+            res.render('usuario/listarUsuario', {
                 usuarios,
                 tipos,
                 filtroNome: nome,
@@ -139,7 +139,7 @@ module.exports = {
             if (!usuario) return res.status(404).send('Usuário não encontrado');
 
             const tipos = db.Usuario.rawAttributes.tipo.values;
-            res.render('usuario/EdicaoUsuario', { usuario: usuario.toJSON(), tipos });
+            res.render('usuario/editarUsuario', { usuario: usuario.toJSON(), tipos });
         } catch (err) {
             console.error(err);
             res.status(500).send('Erro ao carregar o usuário');
@@ -157,7 +157,7 @@ module.exports = {
             }
 
             await db.Usuario.update(updateData, { where: { id } });
-            res.redirect('/listaUsuarios');
+            res.redirect('/listarUsuario');
         } catch (err) {
             console.error(err);
             res.status(500).send('Erro ao atualizar usuário');
@@ -168,7 +168,7 @@ module.exports = {
     async getDelete(req, res) {
         try {
             await db.Usuario.destroy({ where: { id: req.params.id } });
-            res.redirect('/listaUsuarios');
+            res.redirect('/listarUsuario');
         } catch (err) {
             console.error(err);
             res.status(500).send('Erro ao deletar usuário');

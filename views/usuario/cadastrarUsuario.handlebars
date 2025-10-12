@@ -1,7 +1,7 @@
 <form action="/cadastrarUsuario" method="post">
     <div class="form-group">
-        <label for="inputLogin">Nome</label>
-        <input type="text" class="form-control" id="inputNome" name="login">
+        <label for="inputNome">Nome</label>
+        <input type="text" class="form-control" id="inputNome" name="nome">
     </div>
     <div class="form-group">
         <label for="inputLogin">Login</label>
@@ -13,7 +13,11 @@
     </div>
     <div class="form-group">
         <label for="inputTipo">Tipo</label>
-        <input type="number" class="form-control" id="inputTipo" name="tipo">
+        <select class="form-control" id="inputTipo" name="tipo" required>
+            <option value="">Selecione...</option>
+            <option value="aluno" {{#if (eq usuario.tipo "aluno")}}selected{{/if}}>Aluno</option>
+            <option value="admin" {{#if (eq usuario.tipo "admin")}}selected{{/if}}>Administrador</option>
+        </select>
     </div>
     <button type="submit" class="btn btn-primary">Cadastrar</button>
 </form>
