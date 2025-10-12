@@ -24,6 +24,10 @@ module.exports = (sequelize, Sequelize) => {
             },
             onDelete: 'CASCADE'
         },
+        nivel:{
+            type: Sequelize.INTEGER,
+            allowNull: false
+        }
     }, {
         tableName:'usuarioConhecimento'
     });
