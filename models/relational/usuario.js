@@ -20,7 +20,7 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false
         },
         tipo: {
-            type: Sequelize.ENUM('aluno', 'admin', 'externo'),
+            type: Sequelize.ENUM('aluno', 'admin'),
             allowNull: false
         }
     });
