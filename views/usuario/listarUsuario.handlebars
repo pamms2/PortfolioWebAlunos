@@ -22,14 +22,14 @@
             <th scope="row">{{login}}</th>
             <td>{{senha}}</td>
             <td>{{tipo}}</td>
-            <td><a href="usuarioUpdate/{{id}}">Editar</a></td>
-            <td><a href="usuarioDelete/{{id}}">Deletar</a></td>
+            <td><a href="editarUsuario/{{id}}">Editar</a></td>
+            <td><a href="excluirUsuario/{{id}}">Deletar</a></td>
         </tr>
         {{/each}}
     </tbody>
 </table>
 
 <div class="mt-3 d-flex justify-content-between">
-    <a href="/usuarioList?pagina={{subtract paginaAtual 1}}" class="btn btn-outline-secondary btn-sm">Anterior</a>
-    <a href="/usuarioList?pagina={{add paginaAtual 1}}" class="btn btn-outline-secondary btn-sm">Próxima</a>
+    <a href="/listarUsuario?pagina={{subtract paginaAtual 1}}" class="btn btn-outline-secondary btn-sm">Anterior</a>
+    <a href="/listarUsuario?pagina={{add paginaAtual 1}}" class="btn btn-outline-secondary btn-sm">Próxima</a>
 </div>
