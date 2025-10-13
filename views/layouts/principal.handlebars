@@ -14,6 +14,9 @@
 </head>​
 
 <body>
+    <center>
+        <image width="5%" src="../images/logo.png"></image> <br>
+    </center>
     <div class="d-flex">
         <!-- Sidebar -->
         <nav class="sidebar bg-light">
@@ -23,7 +26,7 @@
                 <!-- Usuário -->
                 {{#if aluno}}
                     <li class="nav-item">
-                        <a class="nav-link" href="/usuario/visualizar">Usuário</a>
+                        <a class="nav-link" href="/visualizarUsuario/{{usuario.id}}">Usuário</a>
                     </li>
                 {{/if}}
 
@@ -31,8 +34,8 @@
                     <li class="nav-item">
                         <a href="#submenuUsuario" data-toggle="collapse" class="nav-link dropdown-toggle">Usuário</a>
                         <ul class="collapse list-unstyled ml-3" id="submenuUsuario">
-                            <li><a href="/usuario/cadastrar" class="nav-link">Cadastrar</a></li>
-                            <li><a href="/usuario/listar" class="nav-link">Listar</a></li>
+                            <li><a href="/cadastrarUsuario" class="nav-link">Cadastrar</a></li>
+                            <li><a href="/listarUsuario" class="nav-link">Listar</a></li>
                         </ul>
                     </li>
                 {{/if}}
@@ -42,15 +45,15 @@
                     <li class="nav-item">
                         <a href="#submenuProjeto" data-toggle="collapse" class="nav-link dropdown-toggle">Projeto</a>
                         <ul class="collapse list-unstyled ml-3" id="submenuProjeto">
-                            <li><a href="/projeto/cadastrar" class="nav-link">Cadastrar</a></li>
-                            <li><a href="/projeto/listar" class="nav-link">Listar</a></li>
+                            <li><a href="/cadastrarProjeto" class="nav-link">Cadastrar</a></li>
+                            <li><a href="/listarProjeto" class="nav-link">Listar</a></li>
                         </ul>
                     </li>
                 {{/if}}
 
                 {{#if externo}}
                     <li class="nav-item">
-                        <a href="/projeto/listar" class="nav-link">Projeto</a>
+                        <a href="/listarProjeto" class="nav-link">Projeto</a>
                     </li>
                 {{/if}}
 
@@ -59,13 +62,13 @@
                     <li class="nav-item">
                         <a href="#submenuConhecimento" data-toggle="collapse" class="nav-link dropdown-toggle">Conhecimento</a>
                         <ul class="collapse list-unstyled ml-3" id="submenuConhecimento">
-                            <li><a href="/conhecimento/cadastrar" class="nav-link">Cadastrar</a></li>
-                            <li><a href="/conhecimento/listar" class="nav-link">Listar</a></li>
+                            <li><a href="/cadastrarConhecimento" class="nav-link">Cadastrar</a></li>
+                            <li><a href="/listarConhecimento" class="nav-link">Listar</a></li>
                         </ul>
                     </li>
                 {{else}}
                     <li class="nav-item">
-                        <a href="/conhecimento/listar" class="nav-link">Conhecimento</a>
+                        <a href="/listarConhecimento" class="nav-link">Conhecimento</a>
                     </li>
                 {{/if}}
 
@@ -74,8 +77,8 @@
                     <li class="nav-item">
                         <a href="#submenuPalavra" data-toggle="collapse" class="nav-link dropdown-toggle">Palavra-chave</a>
                         <ul class="collapse list-unstyled ml-3" id="submenuPalavra">
-                            <li><a href="/palavra/cadastrar" class="nav-link">Cadastrar</a></li>
-                            <li><a href="/palavra/listar" class="nav-link">Listar</a></li>
+                            <li><a href="/cadastrarPalavra" class="nav-link">Cadastrar</a></li>
+                            <li><a href="/listarPalavra" class="nav-link">Listar</a></li>
                         </ul>
                     </li>
                 {{/if}}
@@ -88,6 +91,4 @@
         </div>
     </div>
 </body>
-</html>
-
 </html>

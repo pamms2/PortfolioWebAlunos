@@ -1,0 +1,8 @@
+<form action="/editarConhecimento" method="post">
+    <input type="hidden" name="id" value={{conhecimento.id}}>
+    <div class="form-group">
+        <label for="inputTitulo">Título</label>
+        <input type="text" class="form-control" id="inputTitulo" name="titulo" value="{{conhecimento.titulo}}">
+    </div>
+    <button type="submit" class="btn btn-primary">Editar</button>
+</form>

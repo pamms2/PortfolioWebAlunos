@@ -1,0 +1,8 @@
+<form action="/editarPalavraChave" method="post">
+    <input type="hidden" name="id" value={{palavraChave.id}}>
+    <div class="form-group">
+        <label for="inputPalavra">Palavra</label>
+        <input type="text" class="form-control" id="inputPalavra" name="palavra" value="{{palavraChave.palavra}}">
+    </div>
+    <button type="submit" class="btn btn-primary">Editar</button>
+</form>
