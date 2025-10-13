@@ -2,6 +2,7 @@ const express = require('express');
 const db = require('../config/db_sequelize');
 const controllerUsuario = require('../controllers/controllerUsuario');
 const controllerProjeto = require('../controllers/controllerProjeto');
+const controllerPalavraChave = require('../controllers/controllerPalavraChave'); 
 const multer = require('multer');
 const route = express.Router();
 
@@ -9,7 +10,6 @@ const route = express.Router();
     console.log('{ force: true }');
 });*/
 //db.Usuario.create({nome:'Administrador', login:'admin', senha:'1234', tipo:'admin'});
-
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -23,25 +23,17 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 //Home
- route.get("/home", function (req, res) {
-
-    if (req.session.login) {
-        res.render('home')
-    }
-    else
-        res.redirect('/');
-}); 
+route.get("/home", (req, res) => {
+    if (req.session.login) res.render('home');
+    else res.redirect('/');
+});
 
 //principal
 route.get('/principal', async (req, res) => {
     try {
         const projetos = await db.Projeto.findAll({
             include: [
-                {
-                    model: db.Usuario,
-                    attributes: ['id', 'nome'],
-                    through: { attributes: [] }
-                }
+                { model: db.Usuario, attributes: ['id', 'nome'], through: { attributes: [] } }
             ],
             order: [['id', 'DESC']]
         });
@@ -70,8 +62,8 @@ route.get("/listarUsuario", controllerUsuario.getList);
 route.get("/editarUsuario/:id", controllerUsuario.getUpdate);
 route.post("/editarUsuario", controllerUsuario.postUpdate);
 route.get("/excluirUsuario/:id", controllerUsuario.getDelete);
-route.get("/visualizarUsuario", controllerProjeto.getByAluno);
-route.get("/visualizarUsuario/:id", controllerProjeto.getByAluno);
+//route.get("/visualizarUsuario", controllerProjeto.getByAluno);
+//route.get("/visualizarUsuario/:id", controllerProjeto.getByAluno);
 
 // Controller Projeto
 route.get("/cadastrarProjeto", controllerProjeto.getCreate);
@@ -80,6 +72,13 @@ route.get("/listarProjeto", controllerProjeto.getList);
 // route.get("/editarProjeto/:id", controllerProjeto.getUpdate);
 route.post("/editarProjeto", controllerProjeto.postUpdate);
 route.get("/excluirProjeto/:id", controllerProjeto.getDelete);
-route.get("/visualizarProjeto/:id", controllerProjeto.getDelete);
+//route.get("/visualizarProjeto/:id", controllerProjeto.getDelete);
+
+// Controller Palavra-Chave
+route.get('/cadastrarPalavraChave', controllerPalavraChave.getCreate);
+route.post('/cadastrarPalavraChave', controllerPalavraChave.postCreate);
+route.get('/listarPalavraChave', controllerPalavraChave.getList);
+route.post('/editarPalavraChave', controllerPalavraChave.postUpdate);
+route.get('/deletarPalavraChave/:id', controllerPalavraChave.getDelete);
 
 module.exports = route;

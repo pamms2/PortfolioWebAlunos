@@ -51,7 +51,7 @@ module.exports = {
             res.locals.admin = (usuario.tipo === 'admin');
 
             res.redirect('/home');
-        } catch(err) {
+        } catch (err) {
             console.error('Erro no login:', err);
             res.redirect('/');
         }

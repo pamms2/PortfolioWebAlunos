@@ -6,11 +6,19 @@ module.exports = {
     async getCreate(req, res) {
         try {
             const alunos = await db.Usuario.findAll({
-                where: {tipo: 'aluno'},
-                attributes: ['id', 'nome']
+            where: { tipo: 'aluno' },
+            attributes: ['id', 'nome']
             });
-            res.render('projeto/cadastrarProjeto', {alunos});
-        } catch(err) {
+
+            const palavras = await db.PalavraChave.findAll({
+            attributes: ['id', 'palavra']
+            });
+
+            res.render('projeto/cadastrarProjeto', {
+            alunos,
+            palavras: palavras.map(p => p.toJSON())
+            });
+        } catch (err) {
             console.error('Erro ao carregar página de cadastro:', err);
             res.status(500).send('Erro ao carregar página de cadastro');
         }
@@ -23,23 +31,17 @@ module.exports = {
             const tipo = req.session.tipo;
 
             if (!usuarioId || tipo !== 'aluno') {
-                return res.status(403).send('Somente alunos logados podem cadastrar projetos.');
+            return res.status(403).send('Somente alunos logados podem cadastrar projetos.');
             }
 
-            const { nome, resumo, link, alunosId } = req.body;
+            const { nome, resumo, link, alunosId, palavrasChave } = req.body;
 
             const projeto = await db.Projeto.create({ nome, resumo, link });
 
             const desenvolvedores = [usuarioId];
 
             if (alunosId) {
-                let ids = [];
-                if (Array.isArray(alunosId)) {
-                    ids = alunosId.map(Number);
-                } else {
-                    ids = [Number(alunosId)];
-                }
-
+                const ids = Array.isArray(alunosId) ? alunosId.map(Number) : [Number(alunosId)];
                 for (let id of ids) {
                     if (!desenvolvedores.includes(id)) desenvolvedores.push(id);
                 }
@@ -47,14 +49,23 @@ module.exports = {
 
             await projeto.setUsuarios(desenvolvedores);
 
-            res.redirect('/principal'); 
+            if (palavrasChave && palavrasChave.length > 0) {
+            const palavrasArray = Array.isArray(palavrasChave)
+                ? palavrasChave.map(Number)
+                : [Number(palavrasChave)];
+
+            await projeto.setPalavraChaves(palavrasArray);
+            }
+
+            res.redirect('/principal');
         } catch (err) {
             console.error('Erro ao criar projeto:', err);
             res.status(500).send('Erro ao criar projeto');
         }
     },
 
-    //listar projetos TODOS
+
+    //listar TODOS projetos 
     async getList(req, res) {
         try {
             const projetos = await db.Projeto.findAll({
@@ -62,78 +73,103 @@ module.exports = {
                     {
                         model: db.Usuario,
                         attributes: ['id', 'nome'],
-                        through: {attributes: []}
+                        through: { attributes: [] }
+                    },
+                    {
+                        model: db.PalavraChave,
+                        attributes: ['id', 'palavra'],
+                        through: { attributes: [] }
                     }
                 ],
                 order: [['id', 'DESC']]
             });
 
-            res.render('projeto/listarProjeto', {
-                projetos: projetos.map(p => p.toJSON())
+            const projetosFormatados = projetos.map(p => {
+                const proj = p.toJSON();
+                proj.palavrasChave = proj.PalavraChave
+                    ? proj.PalavraChave.map(pc => pc.palavra).join(', ')
+                    : '';
+                return proj;
             });
-        } catch(err) {
+
+            res.render('projeto/listarProjeto', {
+                projetos: projetosFormatados
+            });
+        } catch (err) {
             console.error('Erro ao listar projetos', err);
             res.status(500).send("Erro ao listar projeto");
         }
     },
 
-    //listar projetos de um aluno específico
-    async getByAluno(req, res) {
+    //renderizar página de atualização
+    async getUpdate(req, res) {
         try {
-            const usuarioId = req.params.id || req.session.usuarioId;
-
-            if (!usuarioId) {
-                return res.status(401).send('Usuário não autenticado');
-            }
-
-            const usuario = await db.Usuario.findByPk(usuarioId, {
+            const projeto = await db.Projeto.findByPk(req.params.id, {
                 include: [
-                    {
-                        model: db.Projeto,
-                        include: [{ model: db.Usuario, attributes: ['id', 'nome'] }],
-                        through: { attributes: [] }
-                    }
+                    { model: db.Usuario, attributes: ['id', 'nome'] },
+                    { model: db.PalavraChave, attributes: ['id', 'palavra'] }
                 ]
             });
 
-            if (!usuario) return res.status(404).send('Usuário não encontrado');
+            if (!projeto) return res.status(404).send('Projeto não encontrado');
 
-            res.render('usuario/visualizarUsuario', {
-                usuario: usuario.toJSON(),
-                projetos: usuario.projetos.map(p => p.toJSON())
+            const alunos = await db.Usuario.findAll({
+                where: { tipo: 'aluno' },
+                attributes: ['id', 'nome']
+            });
+
+            const palavras = await db.PalavraChave.findAll({
+                attributes: ['id', 'palavra']
+            });
+
+            res.render('projeto/editarProjeto', {
+                projeto: projeto.toJSON(),
+                alunos,
+                palavras: palavras.map(p => p.toJSON())
             });
         } catch (err) {
-            console.error('Erro ao carregar projetos do aluno:', err);
-            res.status(500).send('Erro ao carregar projetos do aluno');
+            console.error(err);
+            res.status(500).send('Erro ao carregar o projeto');
         }
     },
 
-
-    //renderizar página de edição
+    //atualizar projeto
     async postUpdate(req, res) {
         try {
-            const {id, nome, resumo, link} = req.body;
+            const { id, nome, resumo, link, alunosId, palavrasChave } = req.body;
             const usuarioId = req.session.usuarioId;
             const tipo = req.session.tipo;
 
             const projeto = await db.Projeto.findByPk(id, {
-                include: [
-                    {model: db.Usuario, where: {id: usuarioId}, required: false}
-                ]
+                include: [{ model: db.Usuario, attributes: ['id'] }]
             });
 
-            if(!projeto && tipo !== 'admin') {
+            if (!projeto) return res.status(404).send('Projeto não encontrado');
+
+            const ehDesenvolvedor = projeto.Usuarios.some(u => u.id === usuarioId);
+            if (!ehDesenvolvedor && tipo !== 'admin') {
                 return res.status(403).send('Sem permissão para editar este projeto.');
             }
 
-            await db.Projeto.update({nome, resumo, link}, {where: {id}});
-            res.redirect('/visualizarLista');
-        } catch(err) {
+            await projeto.update({ nome, resumo, link });
+
+            if (alunosId) {
+                const ids = Array.isArray(alunosId) ? alunosId.map(Number) : [Number(alunosId)];
+                await projeto.setUsuarios([usuarioId, ...ids]);
+            }
+
+            if (palavrasChave) {
+                const palavrasArray = Array.isArray(palavrasChave)
+                    ? palavrasChave.map(Number)
+                    : [Number(palavrasChave)];
+                await projeto.setPalavraChaves(palavrasArray);
+            }
+
+            res.redirect('/listarProjeto');
+        } catch (err) {
             console.error('Erro ao atualizar projeto:', err);
             res.status(500).send('Erro ao atualizar projeto');
         }
-        
-        
     },
 
     //excluir projeto
@@ -145,16 +181,21 @@ module.exports = {
 
             const projeto = await db.Projeto.findByPk(projetoId, {
                 include: [
-                    { model: db.Usuario, where: { id: usuarioId }, required: false }
+                    { model: db.Usuario, attributes: ['id'] }
                 ]
             });
 
-            if (!projeto && tipo !== 'admin') {
+            if (!projeto) {
+                return res.status(404).send('Projeto não encontrado.');
+            }
+
+            const ehDesenvolvedor = projeto.usuarios.some(u => u.id === usuarioId);
+            if (!ehDesenvolvedor && tipo !== 'admin') {
                 return res.status(403).send('Sem permissão para excluir este projeto.');
             }
 
-            await db.Projeto.destroy({ where: { id: projetoId } });
-            res.redirect('/perfil');
+            await projeto.destroy();
+            res.redirect('/principal');
         } catch (err) {
             console.error('Erro ao deletar projeto:', err);
             res.status(500).send('Erro ao deletar projeto');
