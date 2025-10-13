@@ -1,0 +1,41 @@
+<form method="get" action="/listarProjeto" class="mb-3 d-flex" style="gap: 8px;">
+    <input type="text" name="nome" class="form-control" placeholder="Buscar por nome..." value="{{filtroNome}}">
+    <button type="submit" class="btn btn-primary btn-sm">Buscar</button>
+    <a href="/listarProjeto" class="btn btn-secondary btn-sm">Limpar</a>
+</form>
+
+<!-- fazer o "filtrar por palavra chave" -->
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Nome</th>
+            <th scope="col">Resumo</th>
+            <th scope="col">Link</th>
+            <th scope="col">Palavra-Chave</th> <!-- colocar as palavras chaves -->
+            {{#if aluno}}
+            <th scope="col">Editar</th>
+            <th scope="col">Deletar</th>
+            {{/if}}
+        </tr>
+    </thead>
+    <tbody>
+        {{#each projetos}}
+        <tr>
+            <th scope="row">{{nome}}</th>
+            <th scope="row">{{resumo}}</th>
+            <td>{{link}}</td>
+            <td>{{palavraChave}}</td> <!-- colocar as palavras chaves -->
+            {{#if ../aluno}}
+            <td><a href="editarProjeto/{{id}}">Editar</a></td>
+            <td><a href="excluirProjeto/{{id}}">Deletar</a></td>
+            {{/if}}
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+
+<div class="mt-3 d-flex justify-content-between">
+    <a href="/listarProjeto?pagina={{subtract paginaAtual 1}}" class="btn btn-outline-secondary btn-sm">Anterior</a>
+    <a href="/listarProjeto?pagina={{add paginaAtual 1}}" class="btn btn-outline-secondary btn-sm">Próxima</a>
+</div>
