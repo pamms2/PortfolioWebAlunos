@@ -19,37 +19,37 @@ module.exports = {
     //criar projeto
     async postCreate(req, res) {
         try {
-            const {nome, resumo, link, alunosId} = req.body;
-            const usuarioId = req.session.usuarioId; //aluno logado
+            const usuarioId = req.session.usuarioId;
+            const tipo = req.session.tipo;
 
-            if(!usuarioId) {
-                return res.status(401).send('Usuário não autenticado');
+            if (!usuarioId || tipo !== 'aluno') {
+                return res.status(403).send('Somente alunos logados podem cadastrar projetos.');
             }
 
-            const projeto = await db.Projeto.create({nome, resumo, link});
+            const { nome, resumo, link, alunosId } = req.body;
+
+            const projeto = await db.Projeto.create({ nome, resumo, link });
+
             const desenvolvedores = [usuarioId];
 
-            if(alunosId) {
+            if (alunosId) {
                 let ids = [];
-                if(Array.isArray(alunosId)) {
-                    ids = alunosId.map(function(item) {
-                        return Number(item);
-                    });
+                if (Array.isArray(alunosId)) {
+                    ids = alunosId.map(Number);
                 } else {
-                    ids = [Number(alunosIds)];
+                    ids = [Number(alunosId)];
                 }
-                
-                for(let i = 0; i < ids.length; i++) {
-                    const id = ids[i];
-                    if(!desenvolvedores.includes(id)) {
-                        desenvolvedores.push(id);
-                    }
+
+                for (let id of ids) {
+                    if (!desenvolvedores.includes(id)) desenvolvedores.push(id);
                 }
-                await projeto.setUsuarios(desenvolvedores);
-                res.redirect('/principal');
             }
-        } catch(err) {
-            console.error('Erro ao criar um novo projeto:', err);
+
+            await projeto.setUsuarios(desenvolvedores);
+
+            res.redirect('/principal'); 
+        } catch (err) {
+            console.error('Erro ao criar projeto:', err);
             res.status(500).send('Erro ao criar projeto');
         }
     },
@@ -80,7 +80,11 @@ module.exports = {
     //listar projetos de um aluno específico
     async getByAluno(req, res) {
         try {
-            const usuarioId = req.session.usuarioId || req.params.id;
+            const usuarioId = req.params.id || req.session.usuarioId;
+
+            if (!usuarioId) {
+                return res.status(401).send('Usuário não autenticado');
+            }
 
             const usuario = await db.Usuario.findByPk(usuarioId, {
                 include: [
@@ -103,6 +107,7 @@ module.exports = {
             res.status(500).send('Erro ao carregar projetos do aluno');
         }
     },
+
 
     //renderizar página de edição
     async postUpdate(req, res) {

@@ -11,8 +11,6 @@ const route = express.Router();
 //db.Usuario.create({nome:'Administrador', login:'admin', senha:'1234', tipo:'admin'});
 
 
-module.exports = route;
-/*
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null,  "public/uploads/");
@@ -32,7 +30,35 @@ const upload = multer({ storage: storage });
     }
     else
         res.redirect('/');
-}); */
+}); 
+
+//principal
+route.get('/principal', async (req, res) => {
+    try {
+        const projetos = await db.Projeto.findAll({
+            include: [
+                {
+                    model: db.Usuario,
+                    attributes: ['id', 'nome'],
+                    through: { attributes: [] }
+                }
+            ],
+            order: [['id', 'DESC']]
+        });
+
+        res.render('layouts/principal', {
+            usuarioLogado: req.session.usuarioId ? {
+                id: req.session.usuarioId,
+                login: req.session.login,
+                tipo: req.session.tipo
+            } : null,
+            projetos: projetos.map(p => p.toJSON())
+        });
+    } catch (err) {
+        console.error('Erro ao carregar a página principal:', err);
+        res.status(500).send('Erro ao carregar a página principal');
+    }
+});
 
 //Controller Usuario
 route.get("/", controllerUsuario.getLogin);
@@ -44,13 +70,16 @@ route.get("/listarUsuario", controllerUsuario.getList);
 route.get("/editarUsuario/:id", controllerUsuario.getUpdate);
 route.post("/editarUsuario", controllerUsuario.postUpdate);
 route.get("/excluirUsuario/:id", controllerUsuario.getDelete);
-route.get("/visualizarUsuario/:id", controllerUsuario.getDelete);
+route.get("/visualizarUsuario", controllerProjeto.getByAluno);
+route.get("/visualizarUsuario/:id", controllerProjeto.getByAluno);
 
-//Controller Projeto
+// Controller Projeto
 route.get("/cadastrarProjeto", controllerProjeto.getCreate);
-route.post("/listarProjeto", controllerProjeto.postCreate);
+route.post("/cadastrarProjeto", controllerProjeto.postCreate); 
 route.get("/listarProjeto", controllerProjeto.getList);
 // route.get("/editarProjeto/:id", controllerProjeto.getUpdate);
 route.post("/editarProjeto", controllerProjeto.postUpdate);
 route.get("/excluirProjeto/:id", controllerProjeto.getDelete);
 route.get("/visualizarProjeto/:id", controllerProjeto.getDelete);
+
+module.exports = route;

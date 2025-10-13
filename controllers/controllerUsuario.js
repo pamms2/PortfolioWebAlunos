@@ -10,9 +10,11 @@ module.exports = {
 
     //desconexão da conta
     async getLogout(req, res) {
-        res.cookie('userData', req.cookies.userData, {maxAge: 0, httpOnly: true});
-        req.session.destroy();
-        res.redirect('/');
+        req.session.destroy((err) => {
+            if (err) console.error('Erro ao destruir sessão:', err);
+            res.clearCookie('connect.sid'); // 🟢 limpa o cookie da sessão
+            res.redirect('/');
+        });
     },
 
     //conexão com a conta
@@ -36,6 +38,7 @@ module.exports = {
             }
 
             //login bem-sucedido
+            req.session.usuarioId = usuario.id;
             req.session.login = usuario.login;
             req.session.tipo = usuario.tipo;
 
@@ -69,8 +72,6 @@ module.exports = {
     async postCreate(req, res) {
         try {
             const { nome, login, senha, tipo } = req.body;
-
-            // gera o hash antes de salvar
             const hashSenha = await bcrypt.hash(senha, 10);
 
             await db.Usuario.create({

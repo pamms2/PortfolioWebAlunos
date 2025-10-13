@@ -1,17 +1,29 @@
 const routes = require('./routers/route');
 const handlebars = require('express-handlebars');
 const express = require('express');
-//var cookieParser = require('cookie-parser');
-//var session = require('express-session');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
 const middlewares = require('./middlewares/middleware');
 const app = express();
 const path = require('path');
 
 app.use(express.static(path.join(__dirname, 'public')));
-// app.use(cookieParser());
-// app.use(session({secret:'textosecreto$asdfasdfaswwww', 
-//         cookie:{maxAge: 30*60*1000}}));
+app.use(cookieParser());
+app.use(session({
+  secret: 'textosecreto$asdfasdfaswwww',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 30 * 60 * 1000, 
+    httpOnly: true,
+    secure: false 
+  }
+}));
 
+app.use((req, res, next) => {
+  res.locals.session = req.session;
+  next();
+})
 
 const hbs = handlebars.create({
   defaultLayout: 'principal',
