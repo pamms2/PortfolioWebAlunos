@@ -62,14 +62,14 @@ route.get("/listarUsuario", controllerUsuario.getList);
 route.get("/editarUsuario/:id", controllerUsuario.getUpdate);
 route.post("/editarUsuario", controllerUsuario.postUpdate);
 route.get("/excluirUsuario/:id", controllerUsuario.getDelete);
-//route.get("/visualizarUsuario", controllerProjeto.getByAluno);
-//route.get("/visualizarUsuario/:id", controllerProjeto.getByAluno);
+route.get("/visualizarUsuario", controllerUsuario.getByAluno);
+route.get("/visualizarUsuario/:id", controllerUsuario.getByAluno);
 
 // Controller Projeto
 route.get("/cadastrarProjeto", controllerProjeto.getCreate);
 route.post("/cadastrarProjeto", controllerProjeto.postCreate); 
 route.get("/listarProjeto", controllerProjeto.getList);
-// route.get("/editarProjeto/:id", controllerProjeto.getUpdate);
+route.get("/editarProjeto/:id", controllerProjeto.getUpdate);
 route.post("/editarProjeto", controllerProjeto.postUpdate);
 route.get("/excluirProjeto/:id", controllerProjeto.getDelete);
 //route.get("/visualizarProjeto/:id", controllerProjeto.getDelete);

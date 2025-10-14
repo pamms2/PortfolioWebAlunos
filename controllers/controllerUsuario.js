@@ -88,6 +88,38 @@ module.exports = {
         }
     },
 
+    //visualizar um usuário
+    async getByAluno(req, res) {
+        try {
+            // se tiver parâmetro na URL, usa ele; se não, usa o id do usuário logado
+            const usuarioId = req.params.id || req.session.usuarioId;
+
+            if (!usuarioId) {
+                return res.status(401).send('Usuário não autenticado');
+            }
+
+            const usuario = await db.Usuario.findByPk(usuarioId, {
+                include: [
+                    {
+                        model: db.Projeto,
+                        include: [{ model: db.Usuario, attributes: ['id', 'nome'] }],
+                        through: { attributes: [] }
+                    }
+                ]
+            });
+
+            if (!usuario) return res.status(404).send('Usuário não encontrado');
+
+            res.render('usuario/visualizarUsuario', {
+                usuario: usuario.toJSON(),
+                projetos: usuario.projetos.map(p => p.toJSON())
+            });
+        } catch (err) {
+            console.error('Erro ao carregar projetos do aluno:', err);
+            res.status(500).send('Erro ao carregar projetos do aluno');
+        }
+    },
+
     //listar usuários com filtros e paginação
     async getList(req, res) {
         try {
