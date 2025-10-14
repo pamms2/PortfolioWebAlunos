@@ -63,15 +63,20 @@ module.exports = {
             const tipos = db.Usuario.rawAttributes.tipo.values;
             res.render('usuario/cadastrarUsuario', { tipos });
         } catch (err) {
-            console.error(err);
-            res.status(500).send('Erro ao carregar a página de criação');
+            console.error('Erro ao carregar página de cadastro de usuário:', err);
+            res.status(500).send('Erro ao carregar a página de cadastro de usuário');
         }
     },
 
     //cria conta
     async postCreate(req, res) {
         try {
-            const { nome, login, senha, tipo } = req.body;
+            const {usuarioId, tipoUser} = req.session;
+            if(!usuarioId || tipoUser !== 'admin') {
+                return res.status(403).send("Somente administradores logados podem cadastrar usuários.");
+            }
+
+            const {nome, login, senha, tipo} = req.body;
             const hashSenha = await bcrypt.hash(senha, 10);
 
             await db.Usuario.create({
@@ -83,7 +88,7 @@ module.exports = {
 
             res.redirect('/listarUsuario');
         } catch (err) {
-            console.error(err);
+            console.error('Erro ao cadastrar usuário:', err);
             res.status(500).send('Erro ao criar usuário');
         }
     },
@@ -92,7 +97,7 @@ module.exports = {
     async getByAluno(req, res) {
         try {
             // se tiver parâmetro na URL, usa ele; se não, usa o id do usuário logado
-            const usuarioId = req.params.id || req.session.usuarioId;
+            const usuarioId = req.params.id || req.session?.usuarioId;
 
             if (!usuarioId) {
                 return res.status(401).send('Usuário não autenticado');
@@ -182,6 +187,11 @@ module.exports = {
     //atualiza usuário
     async postUpdate(req, res) {
         try {
+            const {usuarioId, tipoUser} = req.session;
+            if(!usuarioId || tipoUser !== 'admin') {
+                return res.status(403).send("Somente administradores logados podem editar usuários.");
+            }
+
             const { id, nome, login, senha, tipo } = req.body;
             const updateData = { nome, login, tipo };
 
@@ -200,6 +210,11 @@ module.exports = {
     //deleta usuário
     async getDelete(req, res) {
         try {
+            const {usuarioId, tipoUser} = req.session;
+            if(!usuarioId || tipoUser !== 'admin') {
+                return res.status(403).send("Somente administradores logados podem deletar usuários.");
+            }
+
             await db.Usuario.destroy({ where: { id: req.params.id } });
             res.redirect('/listarUsuario');
         } catch (err) {

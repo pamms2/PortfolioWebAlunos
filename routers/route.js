@@ -4,6 +4,7 @@ const controllerUsuario = require('../controllers/controllerUsuario');
 const controllerProjeto = require('../controllers/controllerProjeto');
 const controllerPalavraChave = require('../controllers/controllerPalavraChave'); 
 const multer = require('multer');
+const controllerConhecimento = require('../controllers/controllerConhecimento');
 const route = express.Router();
 
 /*db.sequelize.sync({force: true}).then(() => {
@@ -78,7 +79,16 @@ route.get("/excluirProjeto/:id", controllerProjeto.getDelete);
 route.get('/cadastrarPalavraChave', controllerPalavraChave.getCreate);
 route.post('/cadastrarPalavraChave', controllerPalavraChave.postCreate);
 route.get('/listarPalavraChave', controllerPalavraChave.getList);
+route.get('/editarPalavraChave/:id', controllerPalavraChave.getUpdate);
 route.post('/editarPalavraChave', controllerPalavraChave.postUpdate);
 route.get('/deletarPalavraChave/:id', controllerPalavraChave.getDelete);
+
+// Controller Conhecimento
+route.get('/cadastrarConhecimento', controllerConhecimento.getCreate);
+route.post('/cadastrarConhecimento', controllerConhecimento.postCreate);
+route.get('/listarConhecimento', controllerConhecimento.getList);
+route.get('/editarConhecimento/:id', controllerConhecimento.getUpdate);
+route.post('/editarConhecimento', controllerConhecimento.postUpdate);
+route.get('/deletarConhecimento/:id', controllerConhecimento.getDelete);
 
 module.exports = route;
