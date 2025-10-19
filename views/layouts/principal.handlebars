@@ -14,9 +14,6 @@
 </head>​
 
 <body>
-    <center>
-        <image width="5%" src="../images/logo.png"></image> <br>
-    </center>
     <div class="d-flex">
         <!-- Sidebar -->
         <nav class="sidebar bg-light">
@@ -49,9 +46,7 @@
                             <li><a href="/listarProjeto" class="nav-link">Listar</a></li>
                         </ul>
                     </li>
-                {{/if}}
-
-                {{#if externo}}
+                {{else}}
                     <li class="nav-item">
                         <a href="/listarProjeto" class="nav-link">Projeto</a>
                     </li>
