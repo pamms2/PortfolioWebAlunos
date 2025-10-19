@@ -11,17 +11,17 @@
 <table class="table">
     <thead>
         <tr>
-            <th scope="col">Título</th>
-            {{#if admin}}
+        <th scope="col">Título</th>
+        {{#if admin}}
             <th scope="col">Editar</th>
             <th scope="col">Deletar</th>
-            {{/if}}
+        {{else}}
             {{#if aluno}}
             <th scope="col">Nível</th>
-            {{/if}}
-            {{#if externo}}
+            {{else}}
             <th scope="col">Quantidade de Alunos</th>
             {{/if}}
+        {{/if}}
         </tr>
     </thead>
     <tbody>
@@ -29,14 +29,20 @@
         <tr>
             <th scope="row">{{titulo}}</th>
             {{#if ../admin}}
-            <td><a href="editarConhecimento/{{id}}">Editar</a></td>
-            <td><a href="excluirConhecimento/{{id}}">Deletar</a></td>
+                <td><a href="/editarConhecimento/{{id}}">Editar</a></td>
+                <td><a href="/excluirConhecimento/{{id}}">Deletar</a></td>
             {{/if}}
             {{#if ../aluno}}
-            <!-- input para o usuario aluno colocar um numero inteiro de 0 a 10 -->
+                <td>
+                <form action="/salvarNota" method="post">
+                    <input type="hidden" name="idConhecimento" value="{{id}}">
+                    <input type="number" name="nota" min="0" max="10" required placeholder="0 a 10">
+                    <button type="submit">Salvar</button>
+                </form>
+                </td>
             {{/if}}
             {{#if ../externo}}
-            <!-- mostrar uma variavel na tela que não vem do bd -->"
+                <!-- mostrar uma variavel na tela que não vem do bd -->
             {{/if}}
         </tr>
         {{/each}}
