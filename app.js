@@ -19,6 +19,7 @@ app.use(session({
     secure: false 
   }
 }));
+app.use(middlewares.exposeSession);
 
 app.use((req, res, next) => {
   res.locals.session = req.session;

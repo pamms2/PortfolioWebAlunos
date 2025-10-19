@@ -12,7 +12,7 @@ module.exports = {
     async getLogout(req, res) {
         req.session.destroy((err) => {
             if (err) console.error('Erro ao destruir sessão:', err);
-            res.clearCookie('connect.sid'); // 🟢 limpa o cookie da sessão
+            res.clearCookie('connect.sid'); // limpa o cookie da sessão
             res.redirect('/');
         });
     },
@@ -51,20 +51,16 @@ module.exports = {
             res.locals.admin = (usuario.tipo === 'admin');
             res.locals.aluno = (usuario.tipo === 'aluno');
 
-            res.redirect('/home');
+            res.render('home');
         } catch (err) {
             console.error('Erro no login:', err);
-            res.redirect('/');
+            res.render('/');
         }
     },
 
     //renderiza a página de criação de conta
     async getCreate(req, res) {
         try {
-            const {usuarioId, tipoUser} = req.session;
-            if(!usuarioId || tipoUser !== 'admin') {
-                return res.status(403).send("Somente administradores logados podem cadastrar usuários.");
-            }
             const tipos = db.Usuario.rawAttributes.tipo.values;
             res.render('usuario/cadastrarUsuario', { tipos });
         } catch (err) {
@@ -76,11 +72,6 @@ module.exports = {
     //cria conta
     async postCreate(req, res) {
         try {
-            const {usuarioId, tipoUser} = req.session;
-            if(!usuarioId || tipoUser !== 'admin') {
-                return res.status(403).send("Somente administradores logados podem cadastrar usuários.");
-            }
-
             const {nome, login, senha, tipo} = req.body;
             const hashSenha = await bcrypt.hash(senha, 10);
 
@@ -178,11 +169,6 @@ module.exports = {
     //renderiza página de edição
     async getUpdate(req, res) {
         try {
-            const {usuarioId, tipoUser} = req.session;
-            if(!usuarioId || tipoUser !== 'admin') {
-                return res.status(403).send("Somente administradores logados podem editar usuários.");
-            }
-
             const usuario = await db.Usuario.findByPk(req.params.id);
             if (!usuario) return res.status(404).send('Usuário não encontrado');
 
@@ -197,11 +183,6 @@ module.exports = {
     //atualiza usuário
     async postUpdate(req, res) {
         try {
-            const {usuarioId, tipoUser} = req.session;
-            if(!usuarioId || tipoUser !== 'admin') {
-                return res.status(403).send("Somente administradores logados podem editar usuários.");
-            }
-
             const { id, nome, login, senha, tipo } = req.body;
             const updateData = { nome, login, tipo };
 
@@ -220,11 +201,6 @@ module.exports = {
     //deleta usuário
     async getDelete(req, res) {
         try {
-            const {usuarioId, tipoUser} = req.session;
-            if(!usuarioId || tipoUser !== 'admin') {
-                return res.status(403).send("Somente administradores logados podem deletar usuários.");
-            }
-
             await db.Usuario.destroy({ where: { id: req.params.id } });
             res.redirect('/listarUsuario');
         } catch (err) {

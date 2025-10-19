@@ -27,13 +27,6 @@ module.exports = {
     //criar projeto
     async postCreate(req, res) {
         try {
-            const usuarioId = req.session.usuarioId;
-            const tipo = req.session.tipo;
-
-            if (!usuarioId || tipo !== 'aluno') {
-            return res.status(403).send('Somente alunos logados podem cadastrar projetos.');
-            }
-
             const { nome, resumo, link, alunosId, palavrasChave } = req.body;
 
             const projeto = await db.Projeto.create({ nome, resumo, link });
