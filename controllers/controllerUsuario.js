@@ -12,7 +12,7 @@ module.exports = {
     async getLogout(req, res) {
         req.session.destroy((err) => {
             if (err) console.error('Erro ao destruir sessão:', err);
-            res.clearCookie('connect.sid'); // 🟢 limpa o cookie da sessão
+            res.clearCookie('connect.sid'); // limpa o cookie da sessão
             res.redirect('/');
         });
     },
@@ -49,8 +49,9 @@ module.exports = {
 
             res.locals.login = usuario.nome;
             res.locals.admin = (usuario.tipo === 'admin');
+            res.local.aluno = (usuario.tipo === 'aluno');
 
-            res.redirect('/home');
+            res.render('home');
         } catch(err) {
             console.error('Erro no login:', err);
             res.redirect('/');
