@@ -6,17 +6,18 @@ module.exports = {
     async getCreate(req, res) {
         try {
             const alunos = await db.Usuario.findAll({
-            where: { tipo: 'aluno' },
-            attributes: ['id', 'nome']
+                where: { tipo: 'aluno' },
+                attributes: ['id', 'nome']
             });
 
             const palavras = await db.PalavraChave.findAll({
-            attributes: ['id', 'palavra']
+                order: [['palavra', 'ASC']],
+                attributes: ['id', 'palavra']
             });
 
             res.render('projeto/cadastrarProjeto', {
-            alunos,
-            palavras: palavras.map(p => p.toJSON())
+                alunos,
+                palavras: palavras.map(p => p.toJSON())
             });
         } catch (err) {
             console.error('Erro ao carregar página de cadastro:', err);
@@ -28,9 +29,9 @@ module.exports = {
     async postCreate(req, res) {
         try {
             const { nome, resumo, link, alunosId, palavrasChave } = req.body;
-
+            
             const projeto = await db.Projeto.create({ nome, resumo, link });
-
+            const usuarioId = req.session.usuarioId;
             const desenvolvedores = [usuarioId];
 
             if (alunosId) {
@@ -57,7 +58,6 @@ module.exports = {
         }
     },
 
-
     //listar TODOS projetos 
     async getList(req, res) {
         try {
@@ -79,8 +79,8 @@ module.exports = {
 
             const projetosFormatados = projetos.map(p => {
                 const proj = p.toJSON();
-                proj.palavrasChave = proj.PalavraChave
-                    ? proj.PalavraChave.map(pc => pc.palavra).join(', ')
+                proj.palavrasChave = proj.PalavraChaves
+                    ? proj.PalavraChaves.map(pc => pc.palavra).join(', ')
                     : '';
                 return proj;
             });
@@ -115,23 +115,27 @@ module.exports = {
                 attributes: ['id', 'palavra']
             });
 
+            // lista de IDs de palavras-chave já vinculadas
+            const vinculadas = projeto.PalavraChaves
+                ? projeto.PalavraChaves.map(p => p.id)
+                : [];
+
             res.render('projeto/editarProjeto', {
                 projeto: projeto.toJSON(),
                 alunos,
-                palavras: palavras.map(p => p.toJSON())
+                palavras: palavras.map(p => p.toJSON()),
+                vinculadas
             });
         } catch (err) {
             console.error(err);
             res.status(500).send('Erro ao carregar o projeto');
         }
     },
-
     //atualizar projeto
     async postUpdate(req, res) {
         try {
             const { id, nome, resumo, link, alunosId, palavrasChave } = req.body;
             const usuarioId = req.session.usuarioId;
-            const tipo = req.session.tipo;
 
             const projeto = await db.Projeto.findByPk(id, {
                 include: [{ model: db.Usuario, attributes: ['id'] }]
@@ -139,18 +143,23 @@ module.exports = {
 
             if (!projeto) return res.status(404).send('Projeto não encontrado');
 
-            const ehDesenvolvedor = projeto.Usuarios.some(u => u.id === usuarioId);
-            if (!ehDesenvolvedor && tipo !== 'admin') {
-                return res.status(403).send('Sem permissão para editar este projeto.');
-            }
+            const usuariosDoProjeto = projeto.usuarios || [];
+            const ehDesenvolvedor = usuariosDoProjeto.some(u => u.id === usuarioId);
+            if (!ehDesenvolvedor) return res.status(403).send('Sem permissão para editar este projeto.');
 
             await projeto.update({ nome, resumo, link });
 
+            // Atualiza usuários associados
+            let usuariosAssociados = [usuarioId];
             if (alunosId) {
                 const ids = Array.isArray(alunosId) ? alunosId.map(Number) : [Number(alunosId)];
-                await projeto.setUsuarios([usuarioId, ...ids]);
+                ids.forEach(id => {
+                    if (!usuariosAssociados.includes(id)) usuariosAssociados.push(id);
+                });
             }
+            await projeto.setUsuarios(usuariosAssociados);
 
+            // Atualiza palavras-chave
             if (palavrasChave) {
                 const palavrasArray = Array.isArray(palavrasChave)
                     ? palavrasChave.map(Number)
@@ -173,19 +182,13 @@ module.exports = {
             const tipo = req.session.tipo;
 
             const projeto = await db.Projeto.findByPk(projetoId, {
-                include: [
-                    { model: db.Usuario, attributes: ['id'] }
-                ]
+                include: [{ model: db.Usuario, attributes: ['id'] }]
             });
 
-            if (!projeto) {
-                return res.status(404).send('Projeto não encontrado.');
-            }
+            if (!projeto) return res.status(404).send('Projeto não encontrado');
 
-            const ehDesenvolvedor = projeto.usuarios.some(u => u.id === usuarioId);
-            if (!ehDesenvolvedor && tipo !== 'admin') {
-                return res.status(403).send('Sem permissão para excluir este projeto.');
-            }
+            const ehDesenvolvedor = projeto.Usuarios.some(u => u.id === usuarioId);
+            if (!ehDesenvolvedor && tipo !== 'admin') return res.status(403).send('Sem permissão para excluir este projeto.');
 
             await projeto.destroy();
             res.redirect('/principal');

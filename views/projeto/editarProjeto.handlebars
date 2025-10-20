@@ -6,16 +6,83 @@
     </div>
     <div class="form-group">
         <label for="inputResumo">Resumo</label>
-        <textarea type="text" class="form-control" id="inputResumo" name="resumo" rows="5" value="{{projeto.resumo}}">
+        <textarea type="text" class="form-control" id="inputResumo" name="resumo" rows="5">{{projeto.resumo}}</textarea>
     </div>
     <div class="form-group">
         <label for="inputLink">Link</label>
         <input type="text" class="form-control" id="inputLink" name="link"  value="{{projeto.link}}">
     </div>
+
     <div class="form-group">
-        <label for="inputPalavraChave">Palavra-Chave</label>
-        <input type="number" class="form-control" id="inputPalavraChave" name="tipo"  value="{{projeto.palavraChave}}">
-        <!-- colocar as palavras chaves, sendo 0, 1 ou + -->
+    <label>Palavras-Chave</label>
+    <div id="palavras-container">
+        {{#if vinculadas.length}}
+            {{#each vinculadas}}
+                <div class="input-group mb-2">
+                    <select class="form-control" name="palavrasChave[]">
+                        <option value="" disabled>Selecione uma palavra</option>
+                        {{#each ../palavras}}
+                            <option value="{{this.id}}" {{#if (eq this.id ../this)}}selected{{/if}}>
+                                {{this.palavra}}
+                            </option>
+                        {{/each}}
+                    </select>
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-success addPalavraBtn">+</button>
+                    </div>
+                </div>
+            {{/each}}
+        {{else}}
+            <div class="input-group mb-2">
+                <select class="form-control" name="palavrasChave[]">
+                    <option value="" selected disabled>Selecione uma palavra</option>
+                    {{#each palavras}}
+                        <option value="{{this.id}}">{{this.palavra}}</option>
+                    {{/each}}
+                </select>
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-success addPalavraBtn">+</button>
+                </div>
+            </div>
+        {{/if}}
     </div>
+</div>
+
     <button type="submit" class="btn btn-primary">Editar</button>
 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('palavras-container');
+
+    function atualizarBotoes() {
+        const botoes = container.querySelectorAll('.addPalavraBtn');
+        botoes.forEach((btn, index) => {
+            if (index === botoes.length - 1) {
+                btn.textContent = '+';
+                btn.classList.remove('btn-danger');
+                btn.classList.add('btn-success');
+                btn.onclick = adicionarCampo;
+            } else {
+                btn.textContent = '–';
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-danger');
+                btn.onclick = () => {
+                    btn.closest('.input-group').remove();
+                    atualizarBotoes();
+                };
+            }
+        });
+    }
+
+    function adicionarCampo() {
+        const primeiro = container.querySelector('.input-group');
+        const novo = primeiro.cloneNode(true);
+        novo.querySelector('select').selectedIndex = 0;
+        container.appendChild(novo);
+        atualizarBotoes();
+    }
+
+    atualizarBotoes();
+});
+</script>

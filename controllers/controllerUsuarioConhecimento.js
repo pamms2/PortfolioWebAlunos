@@ -1,6 +1,6 @@
 const db = require('../config/db_sequelize');
 const { Op } = require('sequelize');
-const bcrypt = require('bcryptjs');
+// const bcrypt = require('bcryptjs');
 const { postUpdate } = require('./controllerUsuario');
 
 module.exports = {
