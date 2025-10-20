@@ -1,48 +1,69 @@
-{{#if externo}}
-    <h2>Relatório de Proporção Alunos por Conhecimento</h2>
-{{/if}}
-
 <form method="get" action="/listarConhecimento" class="mb-3 d-flex" style="gap: 8px;">
     <input type="text" name="titulo" class="form-control" placeholder="Buscar por título de conhecimento..." value="{{filtroTitulo}}">
     <button type="submit" class="btn btn-primary btn-sm">Buscar</button>
     <a href="/listarConhecimento" class="btn btn-secondary btn-sm">Limpar</a>
 </form>
 
-<table class="table">
-    <thead>
+<table class="table table-bordered table-hover">
+    <thead class="thead-light">
         <tr>
-        <th scope="col">Título</th>
-        {{#if admin}}
-            <th scope="col">Editar</th>
-            <th scope="col">Deletar</th>
-        {{else}}
-            {{#if aluno}}
-            <th scope="col">Nível</th>
-            {{else}}
-            <th scope="col">Quantidade de Alunos</th>
+            <th scope="col">Título</th>
+
+            {{#if admin}}
+                <th scope="col">Editar</th>
+                <th scope="col">Excluir</th>
+            {{else if aluno}}
+                <th scope="col">Nível</th>
             {{/if}}
-        {{/if}}
         </tr>
     </thead>
+
     <tbody>
-        {{#each conhecimentos}}
+        {{#each conhec}}
         <tr>
-            <th scope="row">{{titulo}}</th>
+            <td>{{titulo}}</td>
+
+            {{!-- ADMIN --}}
             {{#if ../admin}}
-                <td><a href="/editarConhecimento/{{id}}">Editar</a></td>
-                <td><a href="/excluirConhecimento/{{id}}">Deletar</a></td>
-            {{/if}}
-            {{#if ../aluno}}
                 <td>
-                <form action="/salvarNota" method="post">
-                    <input type="hidden" name="idConhecimento" value="{{id}}">
-                    <input type="number" name="nota" min="0" max="10" required placeholder="0 a 10">
-                    <button type="submit">Salvar</button>
-                </form>
+                    <a href="/editarConhecimento/{{id}}" class="btn btn-sm btn-warning">Editar</a>
+                </td>
+                <td>
+                    <a href="/excluirConhecimento/{{id}}" class="btn btn-sm btn-danger">Excluir</a>
                 </td>
             {{/if}}
-            {{#if ../externo}}
-                <!-- mostrar uma variavel na tela que não vem do bd -->
+
+            {{!-- ALUNO --}}
+            {{#if ../aluno}}
+                <td>
+                    {{#if usuarioConhecimento}}
+                        <!-- Já tem vínculo: exibe nível + botões editar/excluir -->
+                        <div class="d-flex align-items-center" style="gap: 8px;">
+                            <span id="nivel-texto-{{id}}">{{usuarioConhecimento.nivel}}</span>
+            
+                            <!-- Formulário de edição (inicialmente oculto) -->
+                            <form id="editar-form-{{id}}" class="d-none" action="/editarVinculoConhecimento" method="post">
+                                <input type="hidden" name="conhecimentoId" value="{{id}}">
+                                <input type="number" name="nivel" min="0" max="10" value="{{usuarioConhecimento.nivel}}" class="form-control form-control-sm" style="width:80px;">
+                                <button type="submit" class="btn btn-sm btn-success">Salvar</button>
+                            </form>
+            
+                            <button type="button" class="btn btn-sm btn-primary" onclick="editarNivel({{id}})">Editar</button>
+            
+                            <form action="/excluirVinculoConhecimento" method="post" style="display:inline;">
+                                <input type="hidden" name="conhecimentoId" value="{{id}}">
+                                <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                            </form>
+                        </div>
+                    {{else}}
+                        <!-- Ainda não tem vínculo: campo para adicionar -->
+                        <form action="/vincularConhecimento" method="post" class="d-flex" style="gap: 8px;">
+                            <input type="hidden" name="conhecimentoId" value="{{id}}">
+                            <input type="number" name="nivel" min="0" max="10" required placeholder="0 a 10" class="form-control form-control-sm" style="width:80px;">
+                            <button type="submit" class="btn btn-sm btn-success">Salvar</button>
+                        </form>
+                    {{/if}}
+                </td>
             {{/if}}
         </tr>
         {{/each}}
@@ -53,3 +74,10 @@
     <a href="/listarConhecimento?pagina={{subtract paginaAtual 1}}" class="btn btn-outline-secondary btn-sm">Anterior</a>
     <a href="/listarConhecimento?pagina={{add paginaAtual 1}}" class="btn btn-outline-secondary btn-sm">Próxima</a>
 </div>
+
+<script>
+function editarNivel(id) {
+    document.getElementById('nivel-texto-' + id).classList.add('d-none');
+    document.getElementById('editar-form-' + id).classList.remove('d-none');
+}
+</script>
