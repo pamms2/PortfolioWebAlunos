@@ -82,7 +82,7 @@ route.post('/cadastrarPalavraChave', middleware.requireAdmin, controllerPalavraC
 route.get('/listarPalavraChave', controllerPalavraChave.getList);
 route.get('/editarPalavraChave/:id', middleware.requireAdmin, controllerPalavraChave.getUpdate);
 route.post('/editarPalavraChave', middleware.requireAdmin, controllerPalavraChave.postUpdate);
-route.get('/deletarPalavraChave/:id',  middleware.requireAdmin, controllerPalavraChave.getDelete);
+route.get('/excluirPalavraChave/:id',  middleware.requireAdmin, controllerPalavraChave.getDelete);
 
 // Controller Conhecimento
 route.get('/cadastrarConhecimento', middleware.requireAdmin, controllerConhecimento.getCreate);
@@ -90,7 +90,7 @@ route.post('/cadastrarConhecimento', middleware.requireAdmin, controllerConhecim
 route.get('/listarConhecimento', controllerConhecimento.getList);
 route.get('/editarConhecimento/:id', middleware.requireAdmin, controllerConhecimento.getUpdate);
 route.post('/editarConhecimento', middleware.requireAdmin, controllerConhecimento.postUpdate);
-route.get('/deletarConhecimento/:id', middleware.requireAdmin, controllerConhecimento.getDelete);
+route.get('/excluirConhecimento/:id', middleware.requireAdmin, controllerConhecimento.getDelete);
 
 //Controller UsuarioConhecimento
 route.post("/vincularConhecimento", controllerUsuarioConhecimento.postCreate);
