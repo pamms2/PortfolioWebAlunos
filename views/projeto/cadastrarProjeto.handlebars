@@ -29,6 +29,21 @@
       </div>
     </div>
 
+    <div class="form-group">
+      <label>Desenvolvedores</label>
+      <div id="alunos-container">
+        <div class="input-group mb-2">
+          <input type="text" class="form-control aluno-input" placeholder="Digite o nome ou login do aluno">
+          <input type="hidden" name="alunosId[]" class="aluno-id">
+          <div class="input-group-append">
+            <button type="button" class="btn btn-success addAlunoBtn">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ul id="sugestoes" class="list-group position-absolute" style="z-index:1000; max-height:150px; overflow:auto; width:100%; display:none;"></ul>
+
   <button type="submit" class="btn btn-primary">Cadastrar Projeto</button>
 </form>
 
@@ -65,5 +80,77 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   atualizarBotoes();
+
+  const containerAlunos = document.getElementById('alunos-container');
+  const sugestoes = document.getElementById('sugestoes');
+
+  function atualizarBotoesAlunos() {
+    const botoes = containerAlunos.querySelectorAll('.addAlunoBtn');
+    botoes.forEach((btn, index) => {
+      if (index === botoes.length - 1) {
+        btn.textContent = '+';
+        btn.classList.remove('btn-danger');
+        btn.classList.add('btn-success');
+        btn.onclick = adicionarCampoAluno;
+      } else {
+        btn.textContent = '–';
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-danger');
+        btn.onclick = () => {
+          btn.closest('.input-group').remove();
+          atualizarBotoesAlunos();
+        };
+      }
+    });
+  }
+
+  function adicionarCampoAluno() {
+    const primeiro = containerAlunos.querySelector('.input-group');
+    const novo = primeiro.cloneNode(true);
+    novo.querySelector('.aluno-input').value = '';
+    novo.querySelector('.aluno-id').value = '';
+    containerAlunos.appendChild(novo);
+    atualizarBotoesAlunos();
+    configurarAutoComplete(novo.querySelector('.aluno-input'));
+  }
+
+  function configurarAutoComplete(input) {
+    input.addEventListener('input', async () => {
+      const termo = input.value.trim();
+      if (termo.length < 2) {
+        sugestoes.style.display = 'none';
+        return;
+      }
+
+      const resposta = await fetch(`/buscarAlunos?termo=${encodeURIComponent(termo)}`);
+      const alunos = await resposta.json();
+
+      sugestoes.innerHTML = '';
+      alunos.forEach(a => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item list-group-item-action';
+        li.textContent = a.nome + (a.login ? ` (${a.login})` : '');
+        li.onclick = () => {
+          input.value = a.nome;
+          input.closest('.input-group').querySelector('.aluno-id').value = a.id;
+          sugestoes.style.display = 'none';
+        };
+        sugestoes.appendChild(li);
+      });
+
+      sugestoes.style.display = alunos.length ? 'block' : 'none';
+    });
+
+    // esconder sugestões ao clicar fora
+    document.addEventListener('click', e => {
+      if (!sugestoes.contains(e.target) && e.target !== input) {
+        sugestoes.style.display = 'none';
+      }
+    });
+  }
+
+  // inicializa o primeiro campo
+  configurarAutoComplete(document.querySelector('.aluno-input'));
+  atualizarBotoesAlunos();
 });
 </script>

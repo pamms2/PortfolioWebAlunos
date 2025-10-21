@@ -14,75 +14,160 @@
     </div>
 
     <div class="form-group">
-    <label>Palavras-Chave</label>
-    <div id="palavras-container">
-        {{#if vinculadas.length}}
-            {{#each vinculadas}}
+        <label>Palavras-Chave</label>
+        <div id="palavras-container">
+            {{#if vinculadas}}
+                {{#each vinculadas}}
+                    <div class="input-group mb-2">
+                        <select class="form-control" name="palavrasChave[]">
+                            <option value="" disabled>Selecione uma palavra</option>
+                            {{#each ../palavras}}
+                                <option value="{{this.id}}" {{isSelected this.id ../../vinculadas}}>
+                                    {{this.palavra}}
+                                </option>
+                            {{/each}}
+                        </select>
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-danger removePalavraBtn">–</button>
+                        </div>
+                    </div>
+                {{/each}}
+            {{else}}
                 <div class="input-group mb-2">
                     <select class="form-control" name="palavrasChave[]">
-                        <option value="" disabled>Selecione uma palavra</option>
-                        {{#each ../palavras}}
-                            <option value="{{this.id}}" {{#if (eq this.id ../this)}}selected{{/if}}>
-                                {{this.palavra}}
-                            </option>
+                        <option value="" selected disabled>Selecione uma palavra</option>
+                        {{#each palavras}}
+                            <option value="{{this.id}}">{{this.palavra}}</option>
                         {{/each}}
                     </select>
                     <div class="input-group-append">
                         <button type="button" class="btn btn-success addPalavraBtn">+</button>
                     </div>
                 </div>
-            {{/each}}
-        {{else}}
-            <div class="input-group mb-2">
-                <select class="form-control" name="palavrasChave[]">
-                    <option value="" selected disabled>Selecione uma palavra</option>
-                    {{#each palavras}}
-                        <option value="{{this.id}}">{{this.palavra}}</option>
-                    {{/each}}
-                </select>
+            {{/if}}
+        </div>
+    </div>
+
+    <div class="form-group position-relative">
+        <label>Desenvolvedores</label>
+        <div id="alunos-container">
+            {{#if alunosVinculados.length}}
+            {{#each alunosVinculados}}
+                <div class="input-group mb-2 position-relative">
+                <input type="text" class="form-control aluno-input" value="{{nome}}" placeholder="Pesquisar aluno por nome ou login">
+                <input type="hidden" name="alunosId[]" class="aluno-id" value="{{id}}">
+                <ul class="list-group position-absolute w-100 sugestoes" style="z-index:1000; display:none; max-height:150px; overflow:auto;"></ul>
                 <div class="input-group-append">
-                    <button type="button" class="btn btn-success addPalavraBtn">+</button>
+                    <button type="button" class="btn btn-danger removeAlunoBtn">–</button>
+                </div>
+                </div>
+            {{/each}}
+            {{else}}
+            <div class="input-group mb-2 position-relative">
+                <input type="text" class="form-control aluno-input" placeholder="Pesquisar aluno por nome ou login">
+                <input type="hidden" name="alunosId[]" class="aluno-id">
+                <ul class="list-group position-absolute w-100 sugestoes" style="z-index:1000; display:none; max-height:150px; overflow:auto;"></ul>
+                <div class="input-group-append">
+                <button type="button" class="btn btn-success addAlunoBtn">+</button>
                 </div>
             </div>
-        {{/if}}
-    </div>
-</div>
+            {{/if}}
+        </div>
+        </div>
 
     <button type="submit" class="btn btn-primary">Editar</button>
 </form>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById('palavras-container');
+    document.addEventListener('DOMContentLoaded', () => {
+    const alunoContainer = document.getElementById('alunos-container');
+    const palavraContainer = document.getElementById('palavras-container');
 
-    function atualizarBotoes() {
-        const botoes = container.querySelectorAll('.addPalavraBtn');
-        botoes.forEach((btn, index) => {
-            if (index === botoes.length - 1) {
+    // Atualiza os botões de adicionar/remover
+    function atualizarBotoes(container, addClass, removeClass, addFunc) {
+        const botoesAdd = container.querySelectorAll(`.${addClass}`);
+        const botoesRemover = container.querySelectorAll(`.${removeClass}`);
+
+        botoesAdd.forEach((btn, index) => {
+        if (index === botoesAdd.length - 1) {
+            btn.onclick = addFunc;
+        } else {
+            btn.onclick = () => {
+            btn.closest('.input-group').remove();
+            atualizarBotoes(container, addClass, removeClass, addFunc);
+            };
+        }
+        });
+
+        botoesRemover.forEach(btn => {
+        btn.onclick = () => {
+            btn.closest('.input-group').remove();
+        };
+        });
+    }
+
+    // Adicionar novos campos
+    function addAluno() {
+        const primeiro = alunoContainer.querySelector('.input-group');
+        const novo = primeiro.cloneNode(true);
+        novo.querySelector('.aluno-input').value = '';
+        novo.querySelector('.aluno-id').value = '';
+        novo.querySelector('.sugestoes').innerHTML = '';
+        alunoContainer.appendChild(novo);
+        configurarAutoComplete(novo.querySelector('.aluno-input'));
+        atualizarBotoes(alunoContainer, 'addAlunoBtn', 'removeAlunoBtn', addAluno);
+    }
+
+    function addPalavra() {
+        const primeiro = palavraContainer.querySelector('.input-group');
+        const novo = primeiro.cloneNode(true);
+        novo.querySelector('select').selectedIndex = 0;
+        palavraContainer.appendChild(novo);
+        atualizarBotoes(palavraContainer, 'addPalavraBtn', 'removePalavraBtn', addPalavra);
+    }
+
+    // Autocomplete
+    function configurarAutoComplete(input) {
+        const lista = input.parentNode.querySelector('.sugestoes');
+        input.addEventListener('input', async () => {
+        const termo = input.value.trim();
+        if (termo.length < 2) {
+            lista.style.display = 'none';
+            return;
+        }
+        const res = await fetch(`/buscarAlunos?termo=${encodeURIComponent(termo)}`);
+        const alunos = await res.json();
+        lista.innerHTML = alunos.map(a =>
+            `<li class="list-group-item list-group-item-action" data-id="${a.id}">${a.nome} (${a.login})</li>`
+        ).join('');
+        lista.style.display = 'block';
+        lista.querySelectorAll('li').forEach(li => {
+            li.addEventListener('click', () => {
+            input.value = li.textContent.split('(')[0].trim();
+            input.closest('.input-group').querySelector('.aluno-id').value = li.dataset.id;
+            lista.style.display = 'none';
+            });
+        });
+        });
+    }
+
+    alunoContainer.querySelectorAll('.aluno-input').forEach(configurarAutoComplete);
+    atualizarBotoes(alunoContainer, 'addAlunoBtn', 'removeAlunoBtn', addAluno);
+    if (palavraContainer.querySelectorAll('.input-group').length > 0) {
+        const grupos = palavraContainer.querySelectorAll('.input-group');
+        grupos.forEach((grupo, i) => {
+            const btn = grupo.querySelector('.btn');
+            if (i === grupos.length - 1) {
+                btn.className = 'btn btn-success addPalavraBtn';
                 btn.textContent = '+';
-                btn.classList.remove('btn-danger');
-                btn.classList.add('btn-success');
-                btn.onclick = adicionarCampo;
+                btn.onclick = addPalavra;
             } else {
+                btn.className = 'btn btn-danger removePalavraBtn';
                 btn.textContent = '–';
-                btn.classList.remove('btn-success');
-                btn.classList.add('btn-danger');
-                btn.onclick = () => {
-                    btn.closest('.input-group').remove();
-                    atualizarBotoes();
-                };
+                btn.onclick = () => grupo.remove();
             }
         });
     }
 
-    function adicionarCampo() {
-        const primeiro = container.querySelector('.input-group');
-        const novo = primeiro.cloneNode(true);
-        novo.querySelector('select').selectedIndex = 0;
-        container.appendChild(novo);
-        atualizarBotoes();
-    }
-
-    atualizarBotoes();
 });
 </script>

@@ -32,13 +32,27 @@ const hbs = handlebars.create({
     add: (a, b) => a + b,
     subtract: (a, b) => a - b,
     eq: (a,b) => a === b,
-
     includes: (array, value) => {
       if (!array) return false;
       return array.includes(value);
+    },
+    isSelected: (optionId, vinculadas) => {
+      if (!vinculadas) return '';
+      for (let i = 0; i < vinculadas.length; i++) {
+        if (vinculadas[i].id === optionId) return 'selected';
+      }
+      return '';
+    },
+    isAlunoSelected: (alunoId, alunosVinculados) => {
+      if (!alunosVinculados) return '';
+      for (let i = 0; i < alunosVinculados.length; i++) {
+        if (alunosVinculados[i].id === alunoId) return 'selected';
+      }
+      return '';
     }
   }
 });
+
 
 app.engine('handlebars', hbs.engine);
 app.set('view engine','handlebars');

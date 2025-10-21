@@ -55,6 +55,28 @@ route.get('/principal', async (req, res) => {
     }
 });
 
+route.get('/buscarAlunos', async (req, res) => {
+  const termo = req.query.termo || '';
+
+  try {
+    const alunos = await db.Usuario.findAll({
+      where: {
+        tipo: 'aluno',
+        [db.Sequelize.Op.or]: [
+          { nome: { [db.Sequelize.Op.iLike]: `%${termo}%` } },
+          { login: { [db.Sequelize.Op.iLike]: `%${termo}%` } }
+        ]
+      },
+      attributes: ['id', 'nome', 'login']
+    });
+
+    res.json(alunos);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar alunos.' });
+  }
+});
+
 //Controller Usuario
 route.get("/", controllerUsuario.getLogin);
 route.post("/login", controllerUsuario.postLogin);
