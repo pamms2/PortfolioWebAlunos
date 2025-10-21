@@ -64,35 +64,73 @@ module.exports = {
     //listar TODOS projetos 
     async getList(req, res) {
         try {
-            const projetos = await db.Projeto.findAll({
-                include: [
-                    {
-                        model: db.Usuario,
-                        as: 'Usuarios',        // <--- necessário
-                        attributes: ['id', 'nome'],
-                        through: { attributes: [] }
-                    },
-                    {
-                        model: db.PalavraChave,
-                        as: 'PalavrasChave',   // <--- necessário
-                        attributes: ['id', 'palavra'],
-                        through: { attributes: [] }
-                    }
-                ],
-                order: [['id', 'DESC']]
+            const usuarioId = req.session.usuarioId;
+            const { busca, palavraChave } = req.query;
+
+            const { Op, literal } = require('sequelize');
+            const where = {};
+            const include = [
+                {
+                    model: db.Usuario,
+                    as: 'Usuarios',
+                    attributes: ['id', 'nome', 'login'],
+                    through: { attributes: [] }
+                },
+                {
+                    model: db.PalavraChave,
+                    as: 'PalavrasChave',
+                    attributes: ['id', 'palavra'],
+                    through: { attributes: [] }
+                }
+            ];
+
+            if (busca && busca.trim() !== '') {
+                const termo = `%${busca}%`;
+                include[0].where = {   // include[0] é o 'Usuarios'
+                    [Op.or]: [
+                        { nome: { [Op.iLike]: termo } },
+                        { login: { [Op.iLike]: termo } }
+                    ]
+                };
+                include[0].required = false; // LEFT JOIN
+                where[Op.or] = [
+                    { nome: { [Op.iLike]: termo } }
+                ];
+            }
+
+            let projetos = await db.Projeto.findAll({
+                where,
+                include,
+                order: [['id', 'DESC']],
+                distinct: true
             });
+
+            if (palavraChave && palavraChave !== '') {
+                projetos = projetos.filter(p =>
+                    p.PalavrasChave.some(pc => pc.id === Number(palavraChave))
+                );
+            }
+
+            const palavras = (await db.PalavraChave.findAll({
+                order: [['palavra', 'ASC']],
+                attributes: ['id', 'palavra']
+            })).map(p => p.toJSON());
 
             const projetosFormatados = projetos.map(p => {
                 const proj = p.toJSON();
-                proj.palavrasChave = proj.PalavrasChave
-                    ? proj.PalavrasChave.map(pc => pc.palavra).join(', ')
-                    : '';
+                proj.palavrasChave = proj.PalavrasChave?.map(pc => pc.palavra).join(', ') || '';
+                proj.desenvolvedores = proj.Usuarios?.map(u => u.nome).join(', ') || '';
+                proj.ehDesenvolvedor = proj.Usuarios?.some(u => u.id === usuarioId);
                 return proj;
             });
 
             res.render('projeto/listarProjeto', {
-                projetos: projetosFormatados
+                projetos: projetosFormatados,
+                palavras,
+                filtroBusca: busca || '',
+                filtroPalavra: palavraChave || ''
             });
+
         } catch (err) {
             console.error('Erro ao listar projetos', err);
             res.status(500).send("Erro ao listar projeto");
@@ -123,15 +161,8 @@ module.exports = {
 
             const projetoJSON = projeto.toJSON();
 
-            // Ajuste nomes dos arrays
             const alunosVinculados = projetoJSON.Usuarios?.map(u => ({ id: u.id, nome: u.nome })) || [];
             const vinculadas = projetoJSON.PalavrasChave?.map(p => ({ id: p.id, palavra: p.palavra })) || [];
-
-            console.log('================ DEBUG EDITAR PROJETO ================');
-            console.log('Projeto:', projetoJSON);
-            console.log('Alunos vinculados:', alunosVinculados);
-            console.log('Palavras vinculadas:', vinculadas);
-            console.log('======================================================');
 
             res.render('projeto/editarProjeto', {
                 projeto: projetoJSON,
