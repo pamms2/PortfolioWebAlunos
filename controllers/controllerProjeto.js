@@ -51,7 +51,7 @@ module.exports = {
                 ? palavrasChave.map(Number)
                 : [Number(palavrasChave)];
 
-            await projeto.setPalavraChaves(palavrasArray);
+            await projeto.setPalavrasChave(palavrasArray);
             }
 
             res.redirect('/principal');
@@ -154,12 +154,12 @@ module.exports = {
             const usuarioId = req.session.usuarioId;
 
             const projeto = await db.Projeto.findByPk(id, {
-                include: [{ model: db.Usuario, attributes: ['id'] }]
+                include: [{ model: db.Usuario, as: 'Usuarios', attributes: ['id'] }]
             });
 
             if (!projeto) return res.status(404).send('Projeto não encontrado');
 
-            const usuariosDoProjeto = projeto.usuarios || [];
+            const usuariosDoProjeto = projeto.Usuarios || [];
             const ehDesenvolvedor = usuariosDoProjeto.some(u => u.id === usuarioId);
             if (!ehDesenvolvedor) return res.status(403).send('Sem permissão para editar este projeto.');
 
@@ -184,7 +184,7 @@ module.exports = {
                 const palavrasArray = Array.isArray(palavrasChave)
                     ? palavrasChave.map(Number)
                     : [Number(palavrasChave)];
-                await projeto.setPalavraChaves(palavrasArray);
+                await projeto.setPalavrasChave(palavrasArray);
             }
 
             res.redirect('/listarProjeto');
@@ -202,7 +202,7 @@ module.exports = {
             const tipo = req.session.tipo;
 
             const projeto = await db.Projeto.findByPk(projetoId, {
-                include: [{ model: db.Usuario, attributes: ['id'] }]
+                include: [{ model: db.Usuario, as: 'Usuarios', attributes: ['id'] }]
             });
 
             if (!projeto) return res.status(404).send('Projeto não encontrado');

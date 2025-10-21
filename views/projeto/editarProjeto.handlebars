@@ -80,7 +80,6 @@
         const alunoContainer = document.getElementById('alunos-container');
         const palavraContainer = document.getElementById('palavras-container');
 
-        // Adicionar aluno
         function addAluno() {
             const ultimo = alunoContainer.querySelector('.input-group:last-child');
             const novo = ultimo.cloneNode(true);
@@ -97,15 +96,22 @@
             grupos.forEach((grupo, i) => {
                 const btn = grupo.querySelector('.btn');
                 if (i === grupos.length - 1) {
-                    // último card = adicionar
                     btn.className = 'btn btn-success addAlunoBtn';
                     btn.textContent = '+';
                     btn.onclick = addAluno;
                 } else {
-                    // alunos existentes = remover
                     btn.className = 'btn btn-danger removeAlunoBtn';
                     btn.textContent = '–';
-                    btn.onclick = () => {
+                    btn.onclick = async () => {
+                        const alunoId = grupo.querySelector('.aluno-id').value;
+                        if (alunoId) {
+                            // remove vínculo no banco
+                            await fetch('/usuarioProjeto/postDelete', {
+                                method: 'POST',
+                                headers: {'Content-Type':'application/json'},
+                                body: JSON.stringify({ projetoId: {{projeto.id}}, usuarioId: alunoId })
+                            });
+                        }
                         grupo.remove();
                         atualizarTodosAlunos();
                     };
@@ -113,7 +119,6 @@
             });
         }
 
-        // Adicionar palavra
         function addPalavra() {
             const ultimo = palavraContainer.querySelector('.input-group:last-child');
             const novo = ultimo.cloneNode(true);
@@ -133,7 +138,16 @@
                 } else {
                     btn.className = 'btn btn-danger removePalavraBtn';
                     btn.textContent = '–';
-                    btn.onclick = () => {
+                    btn.onclick = async () => {
+                        const palavraId = grupo.querySelector('select').value;
+                        if (palavraId) {
+                            // remove vínculo no banco
+                            await fetch('/palavraChaveProjeto/postDelete', {
+                                method: 'POST',
+                                headers: {'Content-Type':'application/json'},
+                                body: JSON.stringify({ projetoId: {{projeto.id}}, palavraChaveId: palavraId })
+                            });
+                        }
                         grupo.remove();
                         atualizarTodosPalavras();
                     };
@@ -141,7 +155,6 @@
             });
         }
 
-        // Autocomplete aluno
         function configurarAutoComplete(input) {
             const lista = input.parentNode.querySelector('.sugestoes');
             input.addEventListener('input', async () => {
@@ -168,7 +181,6 @@
 
         alunoContainer.querySelectorAll('.aluno-input').forEach(configurarAutoComplete);
 
-        // Inicializar
         atualizarTodosAlunos();
         atualizarTodosPalavras();
     });

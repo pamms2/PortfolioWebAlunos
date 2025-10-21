@@ -36,7 +36,7 @@ route.get('/principal', async (req, res) => {
     try {
         const projetos = await db.Projeto.findAll({
             include: [
-                { model: db.Usuario, attributes: ['id', 'nome'], through: { attributes: [] } }
+                { model: db.Usuario, attributes: ['id', 'nome'], through: { attributes: [] }, as:'Usuarios' }
             ],
             order: [['id', 'DESC']]
         });

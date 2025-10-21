@@ -103,7 +103,8 @@ module.exports = {
                 include: [
                     {
                         model: db.Projeto,
-                        include: [{ model: db.Usuario, attributes: ['id', 'nome'] }],
+                        as: 'Projetos',
+                        include: [{ model: db.Usuario, as: 'Usuarios', attributes: ['id', 'nome'] }],
                         through: { attributes: [] }
                     }
                 ]
@@ -113,7 +114,7 @@ module.exports = {
 
             res.render('usuario/visualizarUsuario', {
                 usuario: usuario.toJSON(),
-                projetos: usuario.projetos.map(p => p.toJSON())
+                projetos: (usuario.Projetos || []).map(p => p.toJSON())
             });
         } catch (err) {
             console.error('Erro ao carregar projetos do aluno:', err);
