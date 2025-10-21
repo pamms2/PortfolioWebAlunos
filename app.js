@@ -38,15 +38,16 @@ const hbs = handlebars.create({
     },
     isSelected: (optionId, vinculadas) => {
       if (!vinculadas) return '';
+      const idNum = Number(optionId); // converte o value para número
       for (let i = 0; i < vinculadas.length; i++) {
-        if (vinculadas[i].id === optionId) return 'selected';
+        if (vinculadas[i].id === idNum) return 'selected';
       }
       return '';
     },
     isAlunoSelected: (alunoId, alunosVinculados) => {
       if (!alunosVinculados) return '';
       for (let i = 0; i < alunosVinculados.length; i++) {
-        if (alunosVinculados[i].id === alunoId) return 'selected';
+        if (String(vinculadas[i].id) === String(optionId)) return 'selected';
       }
       return '';
     }

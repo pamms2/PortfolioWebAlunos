@@ -23,36 +23,42 @@ db.UsuarioConhecimento = require('../models/relational/usuarioConhecimento.js')(
 db.Usuario.belongsToMany(db.Projeto, {
     through: db.UsuarioProjeto,
     foreignKey: 'usuarioId',
-    otherKey: 'projetoId'
+    otherKey: 'projetoId',
+    as: 'Projetos'
 });
 db.Projeto.belongsToMany(db.Usuario, {
     through: db.UsuarioProjeto,
     foreignKey: 'projetoId',
-    otherKey: 'usuarioId'
+    otherKey: 'usuarioId',
+    as: 'Usuarios'
 });
 
 // N:M palavra-chave <-> projeto
 db.Projeto.belongsToMany(db.PalavraChave, {
     through: db.PalavraChaveProjeto,
     foreignKey: 'projetoId',
-    otherKey: 'palavraChaveId'
+    otherKey: 'palavraChaveId',
+    as: 'PalavrasChave'
 });
 db.PalavraChave.belongsToMany(db.Projeto, {
     through: db.PalavraChaveProjeto,
     foreignKey: 'palavraChaveId',
-    otherKey: 'projetoId'
+    otherKey: 'projetoId',
+    as: 'Projetos'
 });
 
 // N:M conhecimento <-> usuário
 db.Usuario.belongsToMany(db.Conhecimento, {
     through: db.UsuarioConhecimento,
     foreignKey: 'usuarioId',
-    otherKey: 'conhecimentoId'
+    otherKey: 'conhecimentoId',
+    as: 'Conhecimentos'
 });
 db.Conhecimento.belongsToMany(db.Usuario, {
     through: db.UsuarioConhecimento,
     foreignKey: 'conhecimentoId',
-    otherKey: 'usuarioId'
+    otherKey: 'usuarioId',
+    as: 'Usuarios'
 });
 
 module.exports = db;
