@@ -1,0 +1,22 @@
+<h1>Logs de Acesso</h1>
+
+<table border="1" cellpadding="5">
+    <thead>
+        <tr>
+            <th>IP</th>
+            <th>Rota</th>
+            <th>User Agent</th>
+            <th>Data/Hora</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each logs}}
+        <tr>
+            <td>{{this.ip}}</td>
+            <td>{{this.route}}</td>
+            <td>{{this.userAgent}}</td>
+            <td>{{this.timestamp}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>

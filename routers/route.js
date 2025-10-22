@@ -5,6 +5,7 @@ const controllerUsuario = require('../controllers/controllerUsuario');
 const controllerProjeto = require('../controllers/controllerProjeto');
 const controllerPalavraChave = require('../controllers/controllerPalavraChave'); 
 const controllerConhecimento = require('../controllers/controllerConhecimento');
+const controllerLog = require('../controllers/controllerLog');
 const multer = require('multer');
 const controllerUsuarioConhecimento = require('../controllers/controllerUsuarioConhecimento');
 const route = express.Router();
@@ -113,5 +114,8 @@ route.get('/excluirConhecimento/:id', middleware.requireAdmin, controllerConheci
 route.post("/vincularConhecimento", controllerUsuarioConhecimento.postCreate);
 route.post("/editarVinculoConhecimento", controllerUsuarioConhecimento.postUpdate);
 route.get("/excluirVinculoConhecimento/:usuarioId/:conhecimentoId", controllerUsuarioConhecimento.getDelete);
+
+//Controller Logs
+route.get("/listarLog", middleware.requireAdmin, controllerLog.getList);
 
 module.exports = route;

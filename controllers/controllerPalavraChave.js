@@ -14,11 +14,6 @@ module.exports = {
     //criar palavra-chave
     async postCreate(req, res) {
         try {
-            const {usuarioId, tipo} = req.session;
-            if(!usuarioId || tipo !== 'admin') {
-                return res.status(403).send("Somente administradores logados podem cadastrar palavras-chave.");
-            }
-
             const {palavra} = req.body;
             await db.PalavraChave.create({palavra});
             res.redirect('/listarPalavraChave');
@@ -55,11 +50,6 @@ module.exports = {
     async postUpdate(req, res) {
         try {
             const {id, palavra} = req.body;
-            const {usuarioId, tipo} = req.session;
-            if(!usuarioId || tipo !== 'admin') {
-                return res.status(403).send("Somente administradores logados podem atualizar palavras-chave.");
-            }
-
             await db.PalavraChave.update({palavra}, {where: { id }});
             res.redirect('/listarPalavraChave');
         } catch (err) {

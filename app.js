@@ -3,6 +3,7 @@ const handlebars = require('express-handlebars');
 const express = require('express');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
+const controllerLog = require('./controllers/controllerLog');
 const middlewares = require('./middlewares/middleware');
 const app = express();
 const path = require('path');
@@ -20,6 +21,11 @@ app.use(session({
   }
 }));
 app.use(middlewares.exposeSession);
+
+app.use(async (req, res, next) => {
+    await controllerLog.registrarAcesso(req);
+    next();
+});
 
 app.use((req, res, next) => {
   res.locals.session = req.session;
@@ -55,7 +61,6 @@ const hbs = handlebars.create({
     }
   }
 });
-
 
 app.engine('handlebars', hbs.engine);
 app.set('view engine','handlebars');
