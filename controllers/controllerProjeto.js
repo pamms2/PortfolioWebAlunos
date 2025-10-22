@@ -54,7 +54,7 @@ module.exports = {
             await projeto.setPalavrasChave(palavrasArray);
             }
 
-            res.redirect('/principal');
+            res.redirect('/visualizarProjeto/' + projeto.id);
         } catch (err) {
             console.error('Erro ao criar projeto:', err);
             res.status(500).send('Erro ao criar projeto');
@@ -66,55 +66,60 @@ module.exports = {
         try {
             const usuarioId = req.session.usuarioId;
             const { busca, palavraChave } = req.query;
+            const pagina = parseInt(req.query.pagina, 10) || 1;
+            const limite = 10; 
+            const offset = (pagina - 1) * limite;
 
-            const { Op, literal } = require('sequelize');
             const where = {};
             const include = [
                 {
                     model: db.Usuario,
                     as: 'Usuarios',
                     attributes: ['id', 'nome', 'login'],
-                    through: { attributes: [] }
+                    through: { attributes: [] },
+                    required: false 
                 },
                 {
                     model: db.PalavraChave,
                     as: 'PalavrasChave',
                     attributes: ['id', 'palavra'],
-                    through: { attributes: [] }
+                    through: { attributes: [] },
+                    required: false 
                 }
             ];
 
             if (busca && busca.trim() !== '') {
                 const termo = `%${busca}%`;
-                include[0].where = {   // include[0] é o 'Usuarios'
-                    [Op.or]: [
-                        { nome: { [Op.iLike]: termo } },
-                        { login: { [Op.iLike]: termo } }
-                    ]
-                };
-                include[0].required = false; // LEFT JOIN
+
                 where[Op.or] = [
-                    { nome: { [Op.iLike]: termo } }
+                    { nome: { [Op.iLike]: termo } },
+                    { '$Usuarios.nome$': { [Op.iLike]: termo } },
+                    { link: { [Op.iLike]: termo } }
                 ];
             }
 
-            let projetos = await db.Projeto.findAll({
+            if (palavraChave && palavraChave !== '') {
+                include[1].where = { id: Number(palavraChave) };
+                include[1].required = true; 
+            }
+
+            const { rows: projetos, count: totalItens } = await db.Projeto.findAndCountAll({
                 where,
                 include,
-                order: [['id', 'DESC']],
-                distinct: true
+                order: [['nome', 'ASC']],
+                distinct: true, 
+                limit: limite,
+                offset,
+                col: 'id',
+                subQuery: false
             });
-
-            if (palavraChave && palavraChave !== '') {
-                projetos = projetos.filter(p =>
-                    p.PalavrasChave.some(pc => pc.id === Number(palavraChave))
-                );
-            }
 
             const palavras = (await db.PalavraChave.findAll({
                 order: [['palavra', 'ASC']],
                 attributes: ['id', 'palavra']
             })).map(p => p.toJSON());
+
+            const totalPaginas = Math.ceil(totalItens / limite);
 
             const projetosFormatados = projetos.map(p => {
                 const proj = p.toJSON();
@@ -128,7 +133,10 @@ module.exports = {
                 projetos: projetosFormatados,
                 palavras,
                 filtroBusca: busca || '',
-                filtroPalavra: palavraChave || ''
+                filtroPalavra: palavraChave || '',
+
+                paginaAtual: pagina,
+                totalPaginas
             });
 
         } catch (err) {
@@ -287,7 +295,7 @@ module.exports = {
             if (!ehDesenvolvedor && tipo !== 'admin') return res.status(403).send('Sem permissão para excluir este projeto.');
 
             await projeto.destroy();
-            res.redirect('/principal');
+            res.redirect('/listarProjeto');
         } catch (err) {
             console.error('Erro ao deletar projeto:', err);
             res.status(500).send('Erro ao deletar projeto');

@@ -162,8 +162,8 @@ module.exports = {
             const nome = (req.query.nome || '').trim();
             const tipo = (req.query.tipo || '').trim();
             const login = (req.query.login || '').trim();
-            const pagina = parseInt(req.query.page, 10) || 1;
-            const limite = 5;
+            const pagina = parseInt(req.query.pagina, 10) || 1;
+            const limite = 10;
             const offset = (pagina - 1) * limite;
 
             const where = {};

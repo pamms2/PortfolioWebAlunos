@@ -8,7 +8,7 @@
             type="text" 
             name="busca" 
             class="form-control" 
-            placeholder="Digite o título do projeto, nome ou login do desenvolvedor..."
+            placeholder="Digite o título do projeto, link ou nome do desenvolvedor..."
             value="{{filtroBusca}}">
     </div>
 
@@ -34,10 +34,10 @@
             <table class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th>Nome</th>
-                        <th>Link</th>
-                        <th>Palavras-Chave</th>
-                        <th>Desenvolvedor(es)</th>
+                        <th scope="col">Nome</th>
+                        <th scope="col">Link</th>
+                        <th scope="col">Palavras-Chave</th>
+                        <th scope="col">Desenvolvedor(es)</th>
                         {{#if aluno}}
                             <th></th>
                             <th></th>
@@ -69,6 +69,14 @@
                         {{/if}}
                     </tr>
                     {{/each}}
+                    {{#unless projetos}}
+                        <tr>
+                            <td colspan="4" class="text-center p-4 ps-4">
+                                Nenhum projeto encontrado.
+                            </td>
+                        </tr>
+                    {{/unless}}
+
                 </tbody>
             </table>
         </div>
@@ -76,6 +84,17 @@
 </div>
 
 <div class="mt-3 d-flex justify-content-between">
-    <a href="/listarProjeto?pagina={{subtract paginaAtual 1}}" class="btn btn-outline-secondary btn-sm">Anterior</a>
-    <a href="/listarProjeto?pagina={{add paginaAtual 1}}" class="btn btn-outline-secondary btn-sm">Próxima</a>
+    {{#if (gt paginaAtual 1)}}
+        <a href="/listarProjeto?pagina={{subtract paginaAtual 1}}&titulo={{filtroTitulo}}" class="btn btn-outline-secondary btn-sm">Anterior</a>
+    {{else}}
+        <span class="btn btn-outline-secondary btn-sm disabled">Anterior</span>
+    {{/if}}
+
+    <span>Página {{paginaAtual}} de {{totalPaginas}}</span>
+
+    {{#if (lt paginaAtual totalPaginas)}}
+        <a href="/listarProjeto?pagina={{add paginaAtual 1}}&titulo={{filtroTitulo}}" class="btn btn-outline-secondary btn-sm">Próxima</a>
+    {{else}}
+        <span class="btn btn-outline-secondary btn-sm disabled">Próxima</span>
+    {{/if}}
 </div>

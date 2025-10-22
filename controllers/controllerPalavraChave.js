@@ -40,9 +40,10 @@ module.exports = {
 
             const { count, rows } = await db.PalavraChave.findAndCountAll({
                 ...filtro,
-                order: [['id', 'DESC']],
+                order: [['palavra', 'ASC']],
                 limit: limite,
-                offset: offset
+                offset: offset,
+                col: 'palavra'
             });
 
             const totalPaginas = Math.ceil(count / limite);

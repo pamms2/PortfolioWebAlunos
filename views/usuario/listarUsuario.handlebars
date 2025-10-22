@@ -26,10 +26,27 @@
             <td><a href="excluirUsuario/{{id}}" onclick="event.stopPropagation()" class="text-decoration-none text-danger">Excluir</a></td>
         </tr>
         {{/each}}
+        {{#unless usuarios}}
+                    <tr>
+                        <td colspan="{{#if admin}}3{{else if aluno}}2{{else}}2{{/if}}" class="text-center p-4 ps-4">
+                            Nenhum usuário encontrado.
+                        </td>
+                    </tr>
+        {{/unless}}
     </tbody>
 </table>
-
 <div class="mt-3 d-flex justify-content-between">
-    <a href="/listarUsuario?page={{subtract paginaAtual 1}}" class="btn btn-outline-secondary btn-sm">Anterior</a>
-    <a href="/listarUsuario?page={{add paginaAtual 1}}" class="btn btn-outline-secondary btn-sm">Próxima</a>
+    {{#if (gt paginaAtual 1)}}
+        <a href="/listarConhecimento?pagina={{subtract paginaAtual 1}}&titulo={{filtroTitulo}}" class="btn btn-outline-secondary btn-sm">Anterior</a>
+    {{else}}
+        <span class="btn btn-outline-secondary btn-sm disabled">Anterior</span>
+    {{/if}}
+
+    <span>Página {{paginaAtual}} de {{totalPaginas}}</span>
+
+    {{#if (lt paginaAtual totalPaginas)}}
+        <a href="/listarConhecimento?pagina={{add paginaAtual 1}}&titulo={{filtroTitulo}}" class="btn btn-outline-secondary btn-sm">Próxima</a>
+    {{else}}
+        <span class="btn btn-outline-secondary btn-sm disabled">Próxima</span>
+    {{/if}}
 </div>
