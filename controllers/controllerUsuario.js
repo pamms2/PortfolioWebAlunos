@@ -92,7 +92,6 @@ module.exports = {
     //visualizar um usuário
     async getByAluno(req, res) {
         try {
-            // se tiver parâmetro na URL, usa ele; se não, usa o id do usuário logado
             const usuarioId = req.params.id || req.session?.usuarioId;
 
             if (!usuarioId) {
@@ -104,21 +103,34 @@ module.exports = {
                     {
                         model: db.Projeto,
                         as: 'Projetos',
-                        include: [{ model: db.Usuario, as: 'Usuarios', attributes: ['id', 'nome'] }],
-                        through: { attributes: [] }
+                    },
+                    {
+                        model: db.Conhecimento,
+                        as: 'Conhecimentos', 
+                        attributes: ['id', 'titulo'],
+                        through: { attributes: ['nivel'] }
                     }
                 ]
             });
 
             if (!usuario) return res.status(404).send('Usuário não encontrado');
 
+            const usuarioJson = usuario.toJSON();
+
+            // O Handlebars espera {{nivel}}, mas o Sequelize retorna {{Conhecimentos.UsuarioConhecimento.nivel}}
+            const conhecimentosFormatados = (usuarioJson.Conhecimentos || []).map(c => ({
+                id: c.id,
+                titulo: c.titulo,
+                nivel: c.usuarioConhecimento.nivel // Acessa o dado da tabela de junção
+            }));
+            
             res.render('usuario/visualizarUsuario', {
-                usuario: usuario.toJSON(),
+                usuario: { ...usuarioJson, conhecimentos: conhecimentosFormatados }, 
                 projetos: (usuario.Projetos || []).map(p => p.toJSON())
             });
         } catch (err) {
-            console.error('Erro ao carregar projetos do aluno:', err);
-            res.status(500).send('Erro ao carregar projetos do aluno');
+            console.error('Erro ao carregar perfil do usuário:', err);
+            res.status(500).send('Erro ao carregar perfil do usuário');
         }
     },
 
