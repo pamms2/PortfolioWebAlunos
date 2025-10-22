@@ -97,6 +97,7 @@ route.get("/listarProjeto", controllerProjeto.getList);
 route.get("/editarProjeto/:id", middleware.requireAluno, controllerProjeto.getUpdate);
 route.post("/editarProjeto", middleware.requireAluno, controllerProjeto.postUpdate);
 route.get("/excluirProjeto/:id", middleware.requireAluno, controllerProjeto.getDelete);
+route.get("/visualizarProjeto/:id", controllerProjeto.getByProjeto);
 
 // Controller Palavra-Chave
 route.get('/cadastrarPalavraChave', middleware.requireAdmin, controllerPalavraChave.getCreate);

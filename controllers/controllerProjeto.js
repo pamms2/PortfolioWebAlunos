@@ -99,6 +99,52 @@ module.exports = {
         }
     },
 
+    //Listar um Projeto
+    async getByProjeto(req, res) {
+        try {
+            const projeto = await db.Projeto.findByPk(req.params.id, {
+                include: [
+                    { 
+                        model: db.Usuario, 
+                        as: 'Usuarios',      // Estes são os 'Colaboradores'
+                        attributes: ['id', 'nome', 'login'] 
+                    },
+                    { 
+                        model: db.PalavraChave, 
+                        as: 'PalavrasChave', // Estas são as 'Palavras-Chave'
+                        attributes: ['id', 'palavra']
+                    }
+                ]
+            });
+
+            if (!projeto) {
+                return res.status(404).send('Projeto não encontrado');
+            }
+
+            const projetoJSON = projeto.toJSON();
+
+            // Vamos formatar os dados para o Handlebars usar
+            const palavrasChaveFormatadas = projetoJSON.PalavrasChave 
+                ? projetoJSON.PalavrasChave.map(p => p.palavra) // Um array de strings
+                : [];
+
+            const colaboradores = projetoJSON.Usuarios 
+                ? projetoJSON.Usuarios.map(u => ({ id: u.id, nome: u.nome })) // Um array de objetos
+                : [];
+
+            // Renderiza a nova view
+            res.render('projeto/visualizarProjeto', { 
+                projeto: projetoJSON,
+                palavrasChave: palavrasChaveFormatadas,
+                colaboradores: colaboradores
+            });
+
+        } catch (err) {
+            console.error('Erro ao carregar o projeto:', err);
+            res.status(500).send('Erro ao carregar o projeto');
+        }
+    },
+
     //renderizar página de atualização
     async getUpdate(req, res) {
         try {

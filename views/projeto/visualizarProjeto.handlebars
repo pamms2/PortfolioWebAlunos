@@ -1,23 +1,43 @@
-<form>
-    <div class="form-group">
-        <label for="inputNome">Nome</label>
-        <p class="form-control-plaintext" id="inputNome">{{usuario.nome}}</p>
+<div class="container mt-4">
+    <h2 class="mb-4 text-primary fw-bold text-center">Projeto: {{projeto.nome}}</h2>
+    
+    <div class="mb-3">
+        <span class="fw-bold text-secondary" style="font-size: 1.1rem;">Link:</span>
+        <span class="ms-2">
+            <a href="{{projeto.link}}" target="_blank">{{projeto.link}}</a>
+        </span>
+    </div>
+    
+    <div class="form-group mb-3">
+        <label for="inputResumo" class="fw-bold text-secondary" style="font-size: 1.1rem;">Resumo</label>
+        <p class="form-control-plaintext ps-2" id="inputResumo" style="white-space: pre-wrap;">{{projeto.resumo}}</p>
     </div>
 
-    <div class="form-group">
-        <label for="inputResumo">Resumo</label>
-        <p class="form-control-plaintext" id="inputResumo">{{usuario.resumo}}</p>
+    <div class="form-group mb-3">
+        <label class="fw-bold text-secondary" style="font-size: 1.1rem;">Palavras-Chave</label>
+        <div class="ps-2 mt-1">
+            {{#each palavrasChave}}
+                <span class="badge bg-secondary me-1 fs-6">{{this}}</span>
+            {{else}}
+                <p class="form-control-plaintext ps-0">Nenhuma palavra-chave associada.</p>
+            {{/each}}
+        </div>
     </div>
 
-    <div class="form-group">
-        <label for="inputLink">Link</label>
-        <p class="form-control-plaintext" id="inputLink">{{usuario.link}}</p>
+    <div class="form-group mb-3">
+        <label class="fw-bold text-secondary" style="font-size: 1.1rem;">Colaboradores</label>
+        <ul class="list-group list-group-flush ps-2">
+            {{#each colaboradores}}
+                <li class="list-group-item">
+                    <a href="/visualizarUsuario/{{id}}">{{nome}}</a>
+                </li>
+            {{else}}
+                <li class="list-group-item">Nenhum colaborador associado.</li>
+            {{/each}}
+        </ul>
     </div>
 
-    <div class="form-group">
-        <label for="inputTipo">Tipo</label>
-        <p class="form-control-plaintext" id="inputTipo">{{usuario.tipo}}</p>
-    </div>  <!-- como colocar as palavras chaves -->
-
-    <a href="../layouts/principal.handlebars" class="btn btn-secondary">Voltar</a>
-</form>
+    <div class="card-footer">
+        <a href="/principal" class="btn btn-secondary">Voltar</a>
+    </div>
+</div> 
