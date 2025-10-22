@@ -1,3 +1,5 @@
+<h2 class="mb-5 text-center text-primary fw-bold">Palavras-chave do Sistema</h2>
+
 <form method="get" action="/listarPalavraChave" class="mb-3 d-flex" style="gap: 8px;">
     <input type="text" name="palavra" class="form-control" placeholder="Buscar por palavra..." value="{{filtroPalavra}}">
     <button type="submit" class="btn btn-primary btn-sm">Buscar</button>
@@ -8,16 +10,16 @@
     <thead>
         <tr>
             <th scope="col">Palavra</th>
-            <th scope="col">Editar</th>
-            <th scope="col">Deletar</th>
+            <th scope="col"></th>
+            <th scope="col"></th>
         </tr>
     </thead>
     <tbody>
         {{#each palavras}}
         <tr>
-            <th scope="row">{{palavra}}</th>
-            <td><a href="editarPalavraChave/{{id}}">Editar</a></td>
-            <td><a href="excluirPalavraChave/{{id}}">Deletar</a></td>
+            <td scope="row">{{palavra}}</td>
+            <td><a href="editarPalavraChave/{{id}}"  class="text-decoration-none text-primary">Editar</a></td>
+            <td><a href="excluirPalavraChave/{{id}}"  class="text-decoration-none text-danger">Excluir</a></td> 
         </tr>
         {{/each}}
     </tbody>

@@ -1,4 +1,4 @@
-    <h2 class="mb-5 text-center text-primary fw-bold">Perfil do Usuário</h4>
+    <h2 class="mb-5 text-center text-primary fw-bold">Perfil do Usuário</h2>
 
     <div class="mb-2 text-center">
         <span class="fw-bold text-secondary">Nome:</span>
@@ -15,90 +15,114 @@
         <span class="ms-2">{{usuario.tipo}}</span>
     </div>
 
-    {{#if aluno}}
+    {{#if (eq usuario.tipo "aluno")}}
         <h5 class="mt-5 text-center">Conhecimentos do Usuário</h5>
-        <table class="table table-bordered table-hover mt-3">
-            <thead class="thead-light">
-                <tr>
-                    <th scope="col">Título</th>
-                    <th scope="col">Nível</th>
-                    <th scope="col">Editar</th>
-                    <th scope="col">Excluir</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{#each usuario.conhecimentos}}
-                <tr>
-                    <td>{{titulo}}</td>
-                    <td>
-                        <span id="nivel-texto-{{id}}">{{nivel}}</span>
+        <div class="card shadow-sm mt-3">
+            <div class="card-body table-responsive p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="ps-4">Título</th>
+                            <th scope="col">Nível</th>
+                            
+                            {{#if isOwner}}
+                                <th scope="col" style="width: 100px;">Editar</th>
+                                <th scope="col" style="width: 100px;">Excluir</th>
+                            {{/if}}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each usuario.conhecimentos}}
+                        <tr>
+                            <td class="ps-4">{{titulo}}</td>
+                            <td>
+                                {{#if ../isOwner}}
+                                    <span id="nivel-texto-{{id}}">{{nivel}}</span>
+                                    <form id="editar-form-{{id}}" class="d-none" action="/editarVinculoConhecimento" method="post" style="gap: 8px;">
+                                        <input type="hidden" name="conhecimentoId" value="{{id}}">
+                                        <input type="hidden" name="usuarioId" value="{{../usuario.id}}">
+                                        <input type="number" name="nivel" min="0" max="10" value="{{nivel}}" class="form-control form-control-sm" style="width:80px; display: inline-block;">
+                                        <button type="submit" class="btn btn-sm btn-success">Salvar</button>
+                                    </form>
+                                {{else}}
+                                    {{nivel}}
+                                {{/if}}
+                            </td>
 
-                        <form id="editar-form-{{id}}" class="d-none" action="/editarVinculoConhecimento" method="post">
-                            <input type="hidden" name="conhecimentoId" value="{{id}}">
-                            <input type="hidden" name="usuarioId" value="{{../usuario.id}}">
-                            <input type="number" name="nivel" min="0" max="10" value="{{nivel}}" class="form-control form-control-sm" style="width:80px;">
-                            <button type="submit" class="btn btn-sm btn-success">Salvar</button>
-                        </form>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-sm btn-warning" onclick="editarNivel({{id}})">Editar</button>
-                    </td>
-                    <td>
-                        <a href="/excluirVinculoConhecimento/{{../usuario.id}}/{{id}}" 
-                            class="btn btn-sm btn-danger" 
-                            onclick="return confirm('Tem certeza que deseja excluir este vínculo?');">
-                            Excluir
-                        </a>
-                    </td>
-                </tr>
-                {{/each}}
-            </tbody>
-        </table>
-    {{/if}}
-
-    {{#if aluno}}
-        <h5 class="mt-5 text-center">Projetos do Usuário</h5>
-        <table class="table table-bordered table-hover mt-3">
-            <thead class="thead-light">
-                <tr>
-                    <th scope="col">Nome</th>
-                    <th scope="col">Link</th>
-                    <th scope="col">Palavras-Chave</th>
-                    <th scope="col">Editar</th>
-                    <th scope="col">Excluir</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{#each usuario.projetos}}
-                <tr onclick="window.location='/visualizarProjeto/{{id}}'" style="cursor:pointer;">
-                    <td><a>{{nome}}</a></td>
-                    <td>
-                        {{#if link}}
-                            <a href="{{link}}" target="_blank">{{link}}</a>
+                            {{#if ../isOwner}}
+                            <td>
+                                <a href="#" class="text-decoration-none text-primary" onclick="event.preventDefault(); editarNivel({{id}});">Editar</a>
+                            </td>
+                            <td>
+                                <a href="/excluirVinculoConhecimento/{{../usuario.id}}/{{id}}" 
+                                   class="text-decoration-none text-danger" 
+                                   onclick="return confirm('Tem certeza que deseja excluir este vínculo?');">
+                                   Excluir
+                                </a>
+                            </td>
+                            {{/if}}
+                        </tr>
                         {{else}}
-                            <span class="text-muted">–</span>
-                        {{/if}}
-                    </td>
-                    <td>{{palavrasChave}}</td>
-                    <td>
-                        <a href="/editarProjeto/{{id}}" class="btn btn-sm btn-warning">Editar</a>
-                    </td>
-                    <td>
-                        <a href="/excluirProjeto/{{id}}" 
-                        class="btn btn-sm btn-danger"
-                        onclick="return confirm('Tem certeza que deseja excluir este projeto?');">
-                        Excluir
-                        </a>
-                    </td>
-                </tr>
-                {{else}}
-                    {{! Mensagem se o usuário não tiver projetos }}
-                    <tr>
-                        <td colspan="5" class="text-center">Nenhum projeto cadastrado.</td>
-                    </tr>
-                {{/each}}
-            </tbody>
-        </table>
+                        <tr>
+                            <td colspan="{{#if isOwner}}4{{else}}2{{/if}}" class="text-center p-4">Nenhum conhecimento cadastrado.</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h5 class="mt-5 text-center">Projetos do Usuário</h5>
+        <div class="card shadow-sm mt-3">
+            <div class="card-body table-responsive p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="ps-4">Nome</th>
+                            <th scope="col">Link</th>
+                            <th scope="col">Palavras-Chave</th>
+
+                            {{#if isOwner}}
+                                <th scope="col" style="width: 100px;">Editar</th>
+                                <th scope="col" style="width: 100px;">Excluir</th>
+                            {{/if}}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each usuario.projetos}}
+                        <tr>
+                            <td class="ps-4"><a href="/visualizarProjeto/{{id}}">{{nome}}</a></td>
+                            <td>
+                                {{#if link}}
+                                    <a href="{{link}}" target="_blank">{{link}}</a>
+                                {{else}}
+                                    <span class="text-muted">–</span>
+                                {{/if}}
+                            </td>
+                            <td>{{palavrasChave}}</td>
+
+                            {{#if ../isOwner}}
+                            <td>
+                                <a href="/editarProjeto/{{id}}" class="text-decoration-none text-primary">Editar</a>
+                            </td>
+                            <td>
+                                <a href="/excluirProjeto/{{id}}" 
+                                   class="text-decoration-none text-danger"
+                                   onclick="return confirm('Tem certeza que deseja excluir este projeto?');">
+                                   Excluir
+                                </a>
+                            </td>
+                            {{/if}}
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td colspan="{{#if isOwner}}5{{else}}3{{/if}}" class="text-center p-4">Nenhum projeto cadastrado.</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     {{/if}}
 
     <a href="/principal" class="btn btn-secondary mt-3">Voltar</a>

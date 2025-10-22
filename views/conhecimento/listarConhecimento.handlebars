@@ -1,74 +1,78 @@
-{{! Formulário de Busca }}
+<h2 class="mb-5 text-center text-primary fw-bold">Conhecimentos do Sistema</h2>
+
 <form method="get" action="/listarConhecimento" class="mb-3 d-flex" style="gap: 8px;">
     <input type="text" name="titulo" class="form-control" placeholder="Buscar por título de conhecimento..." value="{{filtroTitulo}}">
     <button type="submit" class="btn btn-primary btn-sm">Buscar</button>
     <a href="/listarConhecimento" class="btn btn-secondary btn-sm">Limpar</a>
 </form>
 
-<table class="table table-bordered table-hover">
-    <thead class="thead-light">
-        <tr>
-            <th scope="col">Título</th>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" class="ps-4">Título</th>
+                        {{#if admin}}
+                            <!--Cabeçalho para Admin -->
+                            <th scope="col">Editar</th>
+                            <th scope="col">Excluir</th>
+                        {{else if aluno}}
+                            <!--Cabeçalho para Aluno -->
+                            <th scope="col">Nível</th>
+                        {{else}}
+                            <!--Cabeçalho para Externos -->
+                            <th scope="col">Qtd. Alunos</th>
+                        {{/if}}
+                    </tr>
+                </thead>
 
-            {{#if admin}}
-                <!--Cabeçalho para Admin -->
-                <th scope="col">Editar</th>
-                <th scope="col">Excluir</th>
+                <tbody>
+                    {{#each conhec}}
+                    <tr>
+                        <td class="ps-4">{{titulo}}</td>
 
-            {{else if aluno}}
-                <!--Cabeçalho para Aluno -->
-                <th scope="col">Nível</th>
+                        {{#if ../admin}}
+                            <td>
+                                <a href="/editarConhecimento/{{id}}" class="text-decoration-none text-primary">Editar</a>
+                            </td>
+                            <td>
+                                <a href="/excluirConhecimento/{{id}}" class="text-decoration-none text-danger" onclick="return confirm('Tem certeza que deseja excluir este conhecimento?');">Excluir</a>
+                            </td>
 
-            {{else}}
-                <!--Cabeçalho para Externos -->
-                <th scope="col">Qtd. Alunos</th>
-            {{/if}}
-        </tr>
-    </thead>
+                        {{else if ../aluno}}
+                            <td>
+                                {{#if nivel}}
+                                    <!-- Se o aluno JÁ tem o conhecimento, mostra o nível -->
+                                    <span class="badge badge-info p-2" style="font-size: 0.9rem;">Nível: {{nivel}}</span>
+                                {{else}}
+                                    <!-- Se o aluno NÃO tem o conhecimento, mostra o formulário para adicionar -->
+                                    <form action="/vincularConhecimento" method="post" class="d-flex" style="gap: 8px;">
+                                        <input type="hidden" name="conhecimentoId" value="{{id}}">
+                                        <input type="number" name="nivel" min="0" max="10" required placeholder="0 a 10" class="form-control form-control-sm" style="width:80px;">
+                                        <button type="submit" class="btn btn-sm btn-success">Salvar</button>
+                                    </form>
+                                {{/if}}
+                            </td>
+                            
+                        {{else}}
+                            <td>{{totalAlunos}}</td>
+                        {{/if}}
+                    </tr>
+                    {{/each}}
 
-    <tbody>
-        {{#each conhec}}
-        <tr>
-            <td>{{titulo}}</td>
-
-            {{#if ../admin}}
-                <td>
-                    <a href="/editarConhecimento/{{id}}" class="btn btn-sm btn-warning">Editar</a>
-                </td>
-                <td>
-                    <a href="/excluirConhecimento/{{id}}" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir este conhecimento?');">Excluir</a>
-                </td>
-
-            {{else if ../aluno}}
-                <td>
-                    {{#if nivel}}
-                        <!-- Se o aluno JÁ tem o conhecimento, mostra o nível -->
-                        <span class="badge badge-info p-2" style="font-size: 0.9rem;">Nível: {{nivel}}</span>
-                    {{else}}
-                        <!-- Se o aluno NÃO tem o conhecimento, mostra o formulário para adicionar -->
-                        <form action="/vincularConhecimento" method="post" class="d-flex" style="gap: 8px;">
-                            <input type="hidden" name="conhecimentoId" value="{{id}}">
-                            <input type="number" name="nivel" min="0" max="10" required placeholder="0 a 10" class="form-control form-control-sm" style="width:80px;">
-                            <button type="submit" class="btn btn-sm btn-success">Salvar</button>
-                        </form>
-                    {{/if}}
-                </td>
-                
-            {{else}}
-                <td>{{totalAlunos}}</td>
-            {{/if}}
-        </tr>
-        {{/each}}
-
-        {{#unless conhec}}
-        <tr>
-            <td colspan="{{#if admin}}3{{else if aluno}}2{{else}}2{{/if}}" class="text-center">
-                Nenhum conhecimento encontrado.
-            </td>
-        </tr>
-        {{/unless}}
-    </tbody>
-</table>
+                    {{#unless conhec}}
+                    <tr>
+                        <td colspan="{{#if admin}}3{{else if aluno}}2{{else}}2{{/if}}" class="text-center p-4 ps-4">
+                            Nenhum conhecimento encontrado.
+                        </td>
+                    </tr>
+                    {{/unless}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 <div class="mt-3 d-flex justify-content-between">
     {{#if (gt paginaAtual 1)}}
