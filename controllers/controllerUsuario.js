@@ -228,12 +228,57 @@ async getByAluno(req, res) {
 
     //deleta usuário
     async getDelete(req, res) {
+        const t = await db.sequelize.transaction();
         try {
-            await db.Usuario.destroy({ where: { id: req.params.id } });
+            const usuarioId = req.params.id;
+
+            const usuario = await db.Usuario.findByPk(usuarioId, {
+                include: [
+                    { 
+                        model: db.Projeto, 
+                        as: 'Projetos', 
+                        include: [
+                            { 
+                                model: db.Usuario, 
+                                as: 'Usuarios',       
+                                attributes: ['id', 'tipo'] 
+                            }
+                        ]
+                    }
+                ],
+                transaction: t
+            });
+
+            if (!usuario) {
+                await t.rollback();
+                return res.status(404).send('Usuário não encontrado');
+            }
+
+            for (const projeto of usuario.Projetos) {
+                await projeto.removeUsuarios([usuarioId], { transaction: t });
+
+                const alunosRestantes = await projeto.getUsuarios({ 
+                    where: { tipo: 'aluno' },
+                    transaction: t
+                });
+
+                if (alunosRestantes.length === 0) {
+                    await projeto.destroy({ transaction: t });
+                    console.log(`Projeto "${projeto.nome}" excluído pois não tinha mais alunos.`);
+                }
+            }
+
+            await usuario.destroy({ transaction: t });
+
+            await t.commit();
             res.redirect('/listarUsuario');
+
         } catch (err) {
+            await t.rollback();
             console.error(err);
             res.status(500).send('Erro ao deletar usuário');
         }
     }
+
+
 };

@@ -242,16 +242,15 @@ module.exports = {
 
             await projeto.update({ nome, resumo, link });
 
-            // Atualiza usuários associados
+            // Atualiza usuários associados (mantendo o editor sempre)
             let usuariosAssociados = [usuarioId];
-            if (alunosId) {
-                const ids = Array.isArray(alunosId)
-                    ? alunosId.map(Number).filter(id => !isNaN(id) && id > 0)
-                    : [Number(alunosId)].filter(id => !isNaN(id) && id > 0);
 
-                ids.forEach(id => {
-                    if (!usuariosAssociados.includes(id)) usuariosAssociados.push(id);
-                });
+            if (alunosId && alunosId.length > 0) {
+                const ids = Array.isArray(alunosId)
+                    ? alunosId.map(Number).filter(id => !isNaN(id) && id > 0 && id !== usuarioId)
+                    : [Number(alunosId)].filter(id => !isNaN(id) && id > 0 && id !== usuarioId);
+
+                usuariosAssociados.push(...ids);
             }
 
             await projeto.setUsuarios(usuariosAssociados);
