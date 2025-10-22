@@ -117,6 +117,6 @@ route.get('/excluirConhecimento/:id', middleware.requireAdmin, controllerConheci
 //Controller UsuarioConhecimento
 route.post("/vincularConhecimento", controllerUsuarioConhecimento.postCreate);
 route.post("/editarVinculoConhecimento", controllerUsuarioConhecimento.postUpdate);
-route.post("/excluirVinculoConhecimento", controllerUsuarioConhecimento.postDelete);
+route.get("/excluirVinculoConhecimento/:usuarioId/:conhecimentoId", controllerUsuarioConhecimento.getDelete);
 
 module.exports = route;
