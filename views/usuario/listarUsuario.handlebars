@@ -1,3 +1,5 @@
+<h2 class="mb-5 text-center text-primary fw-bold">Usuários do Sistema</h2>
+
 <form method="get" action="/listarUsuario" class="mb-3 d-flex" style="gap: 8px;">
     <input type="text" name="nome" class="form-control" placeholder="Buscar por nome..." value="{{filtroNome}}">
     <button type="submit" class="btn btn-primary btn-sm">Buscar</button>
@@ -7,7 +9,6 @@
 <table class="table">
     <thead>
         <tr>
-            <th scope="col">ID</th>
             <th scope="col">Nome</th>
             <th scope="col">Login</th>
             <th scope="col">Tipo</th>
@@ -18,7 +19,6 @@
     <tbody>
         {{#each usuarios}}
         <tr onclick="window.location='/visualizarUsuario/{{id}}'" style="cursor:pointer;">
-            <td>{{id}}</td>
             <td>{{nome}}</td>
             <td>{{login}}</td>
             <td>{{tipo}}</td>
