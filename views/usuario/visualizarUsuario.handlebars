@@ -1,23 +1,65 @@
-<form>
-    <div class="form-group">
-        <label for="inputNome">Nome</label>
-        <p class="form-control-plaintext" id="inputNome">{{usuario.nome}}</p>
+    <h2 class="mb-2 text-center text-primary fw-bold">Perfil do Usuário</h4>
+
+    <div class="mb-2">
+        <span class="fw-bold text-secondary">Nome:</span>
+        <span class="ms-2">{{usuario.nome}}</span>
     </div>
 
-    <div class="form-group">
-        <label for="inputLogin">Login</label>
-        <p class="form-control-plaintext" id="inputLogin">{{usuario.login}}</p>
+    <div class="mb-2">
+        <span class="fw-bold text-secondary">Login:</span>
+        <span class="ms-2">{{usuario.login}}</span>
     </div>
 
-    <div class="form-group">
-        <label for="inputSenha">Senha</label>
-        <p class="form-control-plaintext" id="inputSenha">{{usuario.senha}}</p>
+    <div class="mb-2">
+        <span class="fw-bold text-secondary">Tipo:</span>
+        <span class="ms-2">{{usuario.tipo}}</span>
     </div>
 
-    <div class="form-group">
-        <label for="inputTipo">Tipo</label>
-        <p class="form-control-plaintext" id="inputTipo">{{usuario.tipo}}</p>
-    </div>
 
-    <a href="/principal" class="btn btn-secondary">Voltar</a>
-</form>
+    <h5 class="mt-5 text-center">Conhecimentos do Usuário</h5>
+    <table class="table table-bordered table-hover mt-3">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">Título</th>
+                <th scope="col">Nível</th>
+                <th scope="col">Editar</th>
+                <th scope="col">Excluir</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each usuario.conhecimentos}}
+            <tr>
+                <td>{{titulo}}</td>
+                <td>
+                    <span id="nivel-texto-{{id}}">{{nivel}}</span>
+
+                    <form id="editar-form-{{id}}" class="d-none" action="/editarVinculoConhecimento" method="post">
+                        <input type="hidden" name="conhecimentoId" value="{{id}}">
+                        <input type="hidden" name="usuarioId" value="{{../usuario.id}}">
+                        <input type="number" name="nivel" min="0" max="10" value="{{nivel}}" class="form-control form-control-sm" style="width:80px;">
+                        <button type="submit" class="btn btn-sm btn-success">Salvar</button>
+                    </form>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-warning" onclick="editarNivel({{id}})">Editar</button>
+                </td>
+                <td>
+                    <a href="/excluirVinculoConhecimento/{{../usuario.id}}/{{id}}" 
+                           class="btn btn-sm btn-danger" 
+                           onclick="return confirm('Tem certeza que deseja excluir este vínculo?');">
+                           Excluir
+                    </a>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+
+    <a href="/principal" class="btn btn-secondary mt-3">Voltar</a>
+
+<script>
+function editarNivel(id) {
+    document.getElementById('nivel-texto-' + id).classList.add('d-none');
+    document.getElementById('editar-form-' + id).classList.remove('d-none');
+}
+</script>

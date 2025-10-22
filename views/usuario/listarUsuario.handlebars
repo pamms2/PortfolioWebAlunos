@@ -7,9 +7,9 @@
 <table class="table">
     <thead>
         <tr>
+            <th scope="col">ID</th>
             <th scope="col">Nome</th>
             <th scope="col">Login</th>
-            <th scope="col">Senha</th>
             <th scope="col">Tipo</th>
             <th scope="col">Editar</th>
             <th scope="col">Deletar</th>
@@ -17,19 +17,19 @@
     </thead>
     <tbody>
         {{#each usuarios}}
-        <tr>
-            <th scope="row">{{nome}}</th>
-            <th scope="row">{{login}}</th>
-            <td>{{senha}}</td>
+        <tr onclick="window.location='/visualizarUsuario/{{id}}'" style="cursor:pointer;">
+            <td>{{id}}</td>
+            <td>{{nome}}</td>
+            <td>{{login}}</td>
             <td>{{tipo}}</td>
-            <td><a href="editarUsuario/{{id}}">Editar</a></td>
-            <td><a href="excluirUsuario/{{id}}">Deletar</a></td>
+            <td><a href="editarUsuario/{{id}}" onclick="event.stopPropagation()">Editar</a></td>
+            <td><a href="excluirUsuario/{{id}}" onclick="event.stopPropagation()">Deletar</a></td>
         </tr>
         {{/each}}
     </tbody>
 </table>
 
 <div class="mt-3 d-flex justify-content-between">
-    <a href="/listarUsuario?pagina={{subtract paginaAtual 1}}" class="btn btn-outline-secondary btn-sm">Anterior</a>
-    <a href="/listarUsuario?pagina={{add paginaAtual 1}}" class="btn btn-outline-secondary btn-sm">Próxima</a>
+    <a href="/listarUsuario?page={{subtract paginaAtual 1}}" class="btn btn-outline-secondary btn-sm">Anterior</a>
+    <a href="/listarUsuario?page={{add paginaAtual 1}}" class="btn btn-outline-secondary btn-sm">Próxima</a>
 </div>

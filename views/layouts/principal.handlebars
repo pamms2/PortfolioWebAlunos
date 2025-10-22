@@ -15,72 +15,83 @@
 
 <body>
     <div class="d-flex">
-        <!-- Sidebar -->
-        <nav class="sidebar bg-light">
-            <h5 class="sidebar-title text-center py-3 border-bottom">Menu</h5>
-            <ul class="nav flex-column">
+        <nav class="sidebar bg-light d-flex flex-column">
+            <div>
+                <div class="sidebar-logo text-center py-3">
+                    <a href="/home">
+                        <img src="/images/logo.png" alt="Logo" style="max-width: 100px;">
+                    </a>
+                </div>
 
-                <!-- Usuário -->
-                {{#if aluno}}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/visualizarUsuario/{{usuario.id}}">Usuário</a>
-                    </li>
-                {{/if}}
+                <h5 class="sidebar-title text-center py-3 border-bottom">Menu</h5>
+                <ul class="nav flex-column">
 
-                {{#if admin}}
-                    <li class="nav-item">
-                        <a href="#submenuUsuario" data-toggle="collapse" class="nav-link dropdown-toggle">Usuário</a>
-                        <ul class="collapse list-unstyled ml-3" id="submenuUsuario">
-                            <li><a href="/cadastrarUsuario" class="nav-link">Cadastrar</a></li>
-                            <li><a href="/listarUsuario" class="nav-link">Listar</a></li>
-                        </ul>
-                    </li>
-                {{/if}}
+                    {{#if aluno}}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/visualizarUsuario/{{usuarioId}}">Meu Perfil</a>
+                        </li>
+                    {{/if}}
 
-                <!-- Projeto -->
-                {{#if aluno}}
-                    <li class="nav-item">
-                        <a href="#submenuProjeto" data-toggle="collapse" class="nav-link dropdown-toggle">Projeto</a>
-                        <ul class="collapse list-unstyled ml-3" id="submenuProjeto">
-                            <li><a href="/cadastrarProjeto" class="nav-link">Cadastrar</a></li>
-                            <li><a href="/listarProjeto" class="nav-link">Listar</a></li>
-                        </ul>
-                    </li>
+                    {{#if admin}}
+                        <li class="nav-item">
+                            <a href="#submenuUsuario" data-toggle="collapse" class="nav-link dropdown-toggle">Usuário</a>
+                            <ul class="collapse list-unstyled ml-3" id="submenuUsuario">
+                                <li><a href="/cadastrarUsuario" class="nav-link">Cadastrar</a></li>
+                                <li><a href="/listarUsuario" class="nav-link">Listar</a></li>
+                            </ul>
+                        </li>
+                    {{/if}}
+
+                    {{#if aluno}}
+                        <li class="nav-item">
+                            <a href="#submenuProjeto" data-toggle="collapse" class="nav-link dropdown-toggle">Projeto</a>
+                            <ul class="collapse list-unstyled ml-3" id="submenuProjeto">
+                                <li><a href="/cadastrarProjeto" class="nav-link">Cadastrar</a></li>
+                                <li><a href="/listarProjeto" class="nav-link">Listar</a></li>
+                            </ul>
+                        </li>
+                    {{else}}
+                        <li class="nav-item">
+                            <a href="/listarProjeto" class="nav-link">Projeto</a>
+                        </li>
+                    {{/if}}
+
+                    {{#if admin}}
+                        <li class="nav-item">
+                            <a href="#submenuConhecimento" data-toggle="collapse" class="nav-link dropdown-toggle">Conhecimento</a>
+                            <ul class="collapse list-unstyled ml-3" id="submenuConhecimento">
+                                <li><a href="/cadastrarConhecimento" class="nav-link">Cadastrar</a></li>
+                                <li><a href="/listarConhecimento" class="nav-link">Listar</a></li>
+                            </ul>
+                        </li>
+                    {{else}}
+                        <li class="nav-item">
+                            <a href="/listarConhecimento" class="nav-link">Conhecimento</a>
+                        </li>
+                    {{/if}}
+
+                    {{#if admin}}
+                        <li class="nav-item">
+                            <a href="#submenuPalavra" data-toggle="collapse" class="nav-link dropdown-toggle">Palavra-chave</a>
+                            <ul class="collapse list-unstyled ml-3" id="submenuPalavra">
+                                <li><a href="/cadastrarPalavraChave" class="nav-link">Cadastrar</a></li>
+                                <li><a href="/listarPalavraChave" class="nav-link">Listar</a></li>
+                            </ul>
+                        </li>
+                    {{/if}}
+                </ul>
+            </div>
+
+            <div class="mt-auto p-3 border-top">
+                {{#if login}}
+                    <a href="/logout" class="btn btn-danger btn-block">Logout ({{login}})</a>
                 {{else}}
-                    <li class="nav-item">
-                        <a href="/listarProjeto" class="nav-link">Projeto</a>
-                    </li>
+                    <a href="/login" class="btn btn-success btn-block">Login</a>
                 {{/if}}
+            </div>
 
-                <!-- Conhecimento -->
-                {{#if admin}}
-                    <li class="nav-item">
-                        <a href="#submenuConhecimento" data-toggle="collapse" class="nav-link dropdown-toggle">Conhecimento</a>
-                        <ul class="collapse list-unstyled ml-3" id="submenuConhecimento">
-                            <li><a href="/cadastrarConhecimento" class="nav-link">Cadastrar</a></li>
-                            <li><a href="/listarConhecimento" class="nav-link">Listar</a></li>
-                        </ul>
-                    </li>
-                {{else}}
-                    <li class="nav-item">
-                        <a href="/listarConhecimento" class="nav-link">Conhecimento</a>
-                    </li>
-                {{/if}}
-
-                <!-- Palavra-chave -->
-                {{#if admin}}
-                    <li class="nav-item">
-                        <a href="#submenuPalavra" data-toggle="collapse" class="nav-link dropdown-toggle">Palavra-chave</a>
-                        <ul class="collapse list-unstyled ml-3" id="submenuPalavra">
-                            <li><a href="/cadastrarPalavraChave" class="nav-link">Cadastrar</a></li>
-                            <li><a href="/listarPalavraChave" class="nav-link">Listar</a></li>
-                        </ul>
-                    </li>
-                {{/if}}
-            </ul>
         </nav>
 
-        <!-- Conteúdo principal -->
         <div class="content flex-grow-1 p-4">
             {{{body}}}
         </div>

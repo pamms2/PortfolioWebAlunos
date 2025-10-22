@@ -28,27 +28,18 @@ const upload = multer({ storage: storage });
 
 //Home
 route.get("/home", (req, res) => {
-    if (req.session.login) res.render('home');
-    else res.redirect('/');
+    res.redirect('/principal');
 });
 
-//principal
 route.get('/principal', async (req, res) => {
     try {
-        const projetos = await db.Projeto.findAll({
-            include: [
-                { model: db.Usuario, attributes: ['id', 'nome'], through: { attributes: [] }, as:'Usuarios' }
-            ],
-            order: [['id', 'DESC']]
-        });
-
-        res.render('layouts/principal', {
-            usuarioLogado: req.session.usuarioId ? {
-                id: req.session.usuarioId,
-                login: req.session.login,
-                tipo: req.session.tipo
-            } : null,
-            projetos: projetos.map(p => p.toJSON())
+        // Renderiza o CONTEÚDO ('home.handlebars')
+        // e passa os dados da sessão para o LAYOUT ('principal.handlebars')
+        res.render('home', { 
+            login: req.session.login,
+            admin: (req.session.tipo === 'admin'),
+            aluno: (req.session.tipo === 'aluno'),
+            usuarioId: req.session.usuarioId
         });
     } catch (err) {
         console.error('Erro ao carregar a página principal:', err);
@@ -78,8 +69,11 @@ route.get('/buscarAlunos', async (req, res) => {
   }
 });
 
+//Tela inicial
+route.get("/", (req, res) => res.redirect('/principal')); 
+
 //Controller Usuario
-route.get("/", controllerUsuario.getLogin);
+route.get("/login", controllerUsuario.getLogin); 
 route.post("/login", controllerUsuario.postLogin);
 route.get("/logout", controllerUsuario.getLogout);
 route.get("/cadastrarUsuario", middleware.requireAdmin, controllerUsuario.getCreate);
@@ -98,6 +92,7 @@ route.get("/listarProjeto", controllerProjeto.getList);
 route.get("/editarProjeto/:id", middleware.requireAluno, controllerProjeto.getUpdate);
 route.post("/editarProjeto", middleware.requireAluno, controllerProjeto.postUpdate);
 route.get("/excluirProjeto/:id", middleware.requireAluno, controllerProjeto.getDelete);
+route.get("/visualizarProjeto/:id", controllerProjeto.getByProjeto);
 
 // Controller Palavra-Chave
 route.get('/cadastrarPalavraChave', middleware.requireAdmin, controllerPalavraChave.getCreate);
@@ -118,7 +113,7 @@ route.get('/excluirConhecimento/:id', middleware.requireAdmin, controllerConheci
 //Controller UsuarioConhecimento
 route.post("/vincularConhecimento", controllerUsuarioConhecimento.postCreate);
 route.post("/editarVinculoConhecimento", controllerUsuarioConhecimento.postUpdate);
-route.post("/excluirVinculoConhecimento", controllerUsuarioConhecimento.postDelete);
+route.get("/excluirVinculoConhecimento/:usuarioId/:conhecimentoId", controllerUsuarioConhecimento.getDelete);
 
 //Controller Logs
 route.get("/listarLog", middleware.requireAdmin, controllerLog.getList);

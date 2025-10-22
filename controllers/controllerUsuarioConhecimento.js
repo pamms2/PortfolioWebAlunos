@@ -1,108 +1,86 @@
 const db = require('../config/db_sequelize');
-const { Op } = require('sequelize');
-// const bcrypt = require('bcryptjs');
-const { postUpdate } = require('./controllerUsuario');
 
 module.exports = {
-    async getList(req, res) {
-        try {
-            const usuarioId = req.session.usuarioId;
-            const tipo = req.session.tipo; // 'admin' ou 'aluno'
-
-            // busca todos os conhecimentos
-            const conhecimentos = await db.Conhecimento.findAll();
-
-            // vínculos do usuário logado (caso seja aluno)
-            let conhecimentosUsuario = [];
-            if (tipo === 'aluno') {
-                conhecimentosUsuario = await db.UsuarioConhecimento.findAll({
-                    where: { usuarioId },
-                    include: [{ model: db.Conhecimento }]
-                });
-            }
-
-            // mapa pra relacionar conhecimentoId -> nível
-            const mapaConhecimentos = {};
-            conhecimentosUsuario.forEach(item => {
-                mapaConhecimentos[item.conhecimentoId] = {
-                    nivel: item.nivel
-                };
-            });
-
-            // adiciona info de vínculo e contador de alunos
-            const lista = await Promise.all(conhecimentos.map(async (c) => {
-                // conta alunos que têm esse conhecimento
-                const quantidadeAlunos = await db.UsuarioConhecimento.count({
-                    where: { conhecimentoId: c.id }
-                });
-
-                return {
-                    id: c.id,
-                    titulo: c.titulo,
-                    usuarioConhecimento: mapaConhecimentos[c.id] || null,
-                    quantidadeAlunos
-                };
-            }));
-
-            res.render('conhecimento/listarConhecimento', {
-                conhec: lista,
-                aluno: tipo === 'aluno',
-                admin: tipo === 'admin'
-            });
-        } catch (err) {
-            console.error('Erro ao listar conhecimentos:', err);
-            res.status(500).send('Erro ao listar conhecimentos.');
-        }
-    },
 
     async postCreate(req, res) {
         try {
-            const usuarioId = req.session.usuarioId;
             const { conhecimentoId, nivel } = req.body;
+            const { usuarioId, tipo } = req.session;
 
-            await db.UsuarioConhecimento.create({
-                usuarioId,
-                conhecimentoId,
-                nivel
+            if (tipo !== 'aluno') {
+                return res.status(403).send('Apenas alunos podem vincular conhecimentos.');
+            }
+
+            if (!conhecimentoId || !nivel || nivel < 0 || nivel > 10) {
+                return res.status(400).send('Dados inválidos.');
+            }
+
+            // 'upsert' cria se não existir, ou atualiza se a chave (usuarioId, conhecimentoId) já existir.
+            await db.UsuarioConhecimento.upsert({
+                usuarioId: usuarioId,
+                conhecimentoId: conhecimentoId,
+                nivel: nivel
             });
 
             res.redirect('/listarConhecimento');
         } catch (err) {
-            console.error('Erro ao adicionar conhecimento:', err);
-            res.status(500).send('Erro ao adicionar conhecimento.');
+            console.error('Erro ao vincular conhecimento:', err);
+            res.status(500).send('Erro ao vincular conhecimento');
         }
     },
 
     async postUpdate(req, res) {
         try {
-            const usuarioId = req.session.usuarioId;
-            const { conhecimentoId, nivel } = req.body;
+            // Pega os dados do formulário inline (que vieram do req.body)
+            const { conhecimentoId, usuarioId, nivel } = req.body;
+            const { usuarioId: sessionUsuarioId, tipo: sessionTipo } = req.session;
 
-            await db.UsuarioConhecimento.update(
-                { nivel },
-                { where: { usuarioId, conhecimentoId } }
+            // Segurança: Apenas o próprio aluno ou um admin podem enviar o formulário
+            if (sessionTipo !== 'admin' && sessionUsuarioId.toString() !== usuarioId.toString()) {
+                return res.status(403).send('Você não tem permissão para atualizar este vínculo.');
+            }
+
+            if (!conhecimentoId || !usuarioId || nivel === undefined || nivel < 0 || nivel > 10) {
+                return res.status(400).send('Dados inválidos.');
+            }
+
+            await db.UsuarioConhecimento.update( 
+                { nivel: nivel },
+                { where: { usuarioId: usuarioId, conhecimentoId: conhecimentoId } }
             );
 
-            res.redirect('/listarConhecimento');
+            res.redirect('/visualizarUsuario/' + usuarioId);
+
         } catch (err) {
-            console.error('Erro ao atualizar nível:', err);
-            res.status(500).send('Erro ao atualizar nível.');
+            console.error('Erro ao atualizar vínculo de conhecimento:', err);
+            res.status(500).send('Erro ao atualizar vínculo de conhecimento');
         }
     },
 
-    async postDelete(req, res) {
+    async getDelete(req, res) {
         try {
-            const usuarioId = req.session.usuarioId;
-            const { conhecimentoId } = req.body;
-
+            const { conhecimentoId, usuarioId } = req.params;
+            const { usuarioId: sessionUsuarioId, tipo: sessionTipo } = req.session;
+    
+            if (sessionTipo !== 'admin' && sessionUsuarioId.toString() !== usuarioId.toString()) {
+                return res.status(403).send('Você não tem permissão para excluir este vínculo.');
+            }
+        
+            if (!conhecimentoId || !usuarioId) {
+                return res.status(400).send('Dados inválidos.');
+            }
+        
             await db.UsuarioConhecimento.destroy({
-                where: { usuarioId, conhecimentoId }
+                where: {
+                    usuarioId: usuarioId,
+                    conhecimentoId: conhecimentoId
+                }
             });
-
-            res.redirect('/listarConhecimento');
+        
+            res.redirect('/visualizarUsuario/' + usuarioId);
         } catch (err) {
-            console.error('Erro ao remover vínculo:', err);
-            res.status(500).send('Erro ao remover vínculo.');
+            console.error('Erro ao excluir vínculo de conhecimento:', err);
+            res.status(500).send('Erro ao excluir vínculo de conhecimento');
         }
     }
 };
