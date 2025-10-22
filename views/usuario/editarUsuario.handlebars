@@ -6,17 +6,23 @@
         <label for="inputNome">Nome</label>
         <input type="text" class="form-control" id="inputNome" name="nome" value="{{usuario.nome}}">
     </div>
+
     <div class="form-group">
         <label for="inputLogin">Login</label>
         <input type="text" class="form-control" id="inputLogin" name="login" value="{{usuario.login}}">
     </div>
+
     <div class="form-group">
         <label for="inputSenha">Senha</label>
-        <input type="text" class="form-control" id="inputSenha" name="senha"  value="{{usuario.senha}}">
+        <input type="password" class="form-control" id="inputSenha" name="senha"  value="">
     </div>
+
     <div class="form-group">
         <label for="inputTipo">Tipo</label>
-        <input type="number" class="form-control" id="inputTipo" name="tipo"  value="{{usuario.tipo}}">
+        <select class="form-control" id="inputTipo" name="tipo" required>
+            <option value="aluno" {{#if (eq usuario.tipo "aluno")}}selected{{/if}}>Aluno</option>
+            <option value="admin" {{#if (eq usuario.tipo "admin")}}selected{{/if}}>Administrador</option>
+        </select>
     </div>
     <button type="submit" class="btn btn-primary">Editar</button>
 </form>
