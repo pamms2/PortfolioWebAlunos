@@ -90,9 +90,11 @@ module.exports = {
     },
 
     //visualizar um usuário
-async getByAluno(req, res) {
+    async getByAluno(req, res) {
         try {
             const usuarioId = req.params.id || req.session?.usuarioId;
+            
+            const { usuarioId: sessionUsuarioId, tipo: sessionTipo } = req.session || {};
 
             if (!usuarioId) {
                 return res.status(401).send('Usuário não autenticado');
@@ -112,7 +114,7 @@ async getByAluno(req, res) {
                     },
                     {
                         model: db.Conhecimento,
-                        as: 'Conhecimentos',
+                        as: 'Conhecimentos', 
                         attributes: ['id', 'titulo'],
                         through: { attributes: ['nivel'] }
                     }
@@ -141,7 +143,12 @@ async getByAluno(req, res) {
                     ...usuarioJson, 
                     conhecimentos: conhecimentosFormatados,
                     projetos: projetosFormatados
-                }
+                },
+                sessionUser: {
+                    id: sessionUsuarioId,
+                    isAdmin: (sessionTipo === 'admin')
+                },
+                isOwner: (sessionUsuarioId && sessionUsuarioId.toString() === usuarioJson.id.toString())
             });
         } catch (err) {
             console.error('Erro ao carregar perfil do usuário:', err);
