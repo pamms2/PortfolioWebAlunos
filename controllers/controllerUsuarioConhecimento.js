@@ -44,7 +44,7 @@ module.exports = {
                 return res.status(400).send('Dados inválidos.');
             }
 
-            await db.UsuarioConhecimento.update( // Atenção: use 'usuarioConhecimento' (minúsculo)
+            await db.UsuarioConhecimento.update( 
                 { nivel: nivel },
                 { where: { usuarioId: usuarioId, conhecimentoId: conhecimentoId } }
             );
