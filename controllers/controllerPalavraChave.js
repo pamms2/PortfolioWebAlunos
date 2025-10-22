@@ -26,8 +26,33 @@ module.exports = {
     //listar palavras-chave
     async getList(req, res) {
         try {
-            const palavrasChave = await db.PalavraChave.findAll({order: [['id', 'DESC']]});
-            res.render('palavraChave/listarPalavraChave', {palavras: palavrasChave.map(p => p.toJSON())});
+            const { palavra, pagina = 1 } = req.query; 
+            const limite = 10;
+            const offset = (pagina - 1) * limite;
+
+            const filtro = {};
+
+            if (palavra) {
+                filtro.where = {
+                    palavra: { [db.Sequelize.Op.iLike]: `%${palavra}%` } // busca parcial (case-insensitive dependendo do BD)
+                };
+            }
+
+            const { count, rows } = await db.PalavraChave.findAndCountAll({
+                ...filtro,
+                order: [['id', 'DESC']],
+                limit: limite,
+                offset: offset
+            });
+
+            const totalPaginas = Math.ceil(count / limite);
+
+            res.render('palavraChave/listarPalavraChave', {
+                palavras: rows.map(p => p.toJSON()),
+                filtroPalavra: palavra || '', // mantém o valor digitado no input
+                paginaAtual: Number(pagina),
+                totalPaginas
+            });
         } catch (err) {
             console.error('Erro ao listar palavras-chave:', err);
             res.status(500).send('Erro ao listar palavras-chave');
