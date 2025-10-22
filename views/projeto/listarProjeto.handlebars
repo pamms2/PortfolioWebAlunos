@@ -44,7 +44,7 @@
                 </thead>
                 <tbody>
                     {{#each projetos}}
-                    <tr>
+                    <tr onclick="window.location='/visualizarProjeto/{{id}}'" style="cursor:pointer;"> 
                         <td>{{nome}}</td>
                         <td>
                             {{#if link}}
