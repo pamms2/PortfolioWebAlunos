@@ -90,7 +90,7 @@ module.exports = {
     },
 
     //visualizar um usuário
-    async getByAluno(req, res) {
+async getByAluno(req, res) {
         try {
             const usuarioId = req.params.id || req.session?.usuarioId;
 
@@ -102,11 +102,17 @@ module.exports = {
                 include: [
                     {
                         model: db.Projeto,
-                        as: 'Projetos',
+                        as: 'Projetos', 
+                        include: [{ 
+                            model: db.PalavraChave, 
+                            as: 'PalavrasChave', 
+                            attributes: ['palavra'], 
+                            through: { attributes: [] } 
+                        }]
                     },
                     {
                         model: db.Conhecimento,
-                        as: 'Conhecimentos', 
+                        as: 'Conhecimentos',
                         attributes: ['id', 'titulo'],
                         through: { attributes: ['nivel'] }
                     }
@@ -117,16 +123,25 @@ module.exports = {
 
             const usuarioJson = usuario.toJSON();
 
-            // O Handlebars espera {{nivel}}, mas o Sequelize retorna {{Conhecimentos.UsuarioConhecimento.nivel}}
             const conhecimentosFormatados = (usuarioJson.Conhecimentos || []).map(c => ({
                 id: c.id,
                 titulo: c.titulo,
-                nivel: c.usuarioConhecimento.nivel // Acessa o dado da tabela de junção
+                nivel: c.usuarioConhecimento.nivel 
+            }));
+
+            const projetosFormatados = (usuarioJson.Projetos || []).map(p => ({
+                id: p.id,
+                nome: p.nome,
+                link: p.link,
+                palavrasChave: (p.PalavrasChave || []).map(pc => pc.palavra).join(', ')
             }));
             
             res.render('usuario/visualizarUsuario', {
-                usuario: { ...usuarioJson, conhecimentos: conhecimentosFormatados }, 
-                projetos: (usuario.Projetos || []).map(p => p.toJSON())
+                usuario: { 
+                    ...usuarioJson, 
+                    conhecimentos: conhecimentosFormatados,
+                    projetos: projetosFormatados
+                }
             });
         } catch (err) {
             console.error('Erro ao carregar perfil do usuário:', err);

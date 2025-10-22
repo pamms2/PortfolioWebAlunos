@@ -1,59 +1,105 @@
-    <h2 class="mb-2 text-center text-primary fw-bold">Perfil do Usuário</h4>
+    <h2 class="mb-5 text-center text-primary fw-bold">Perfil do Usuário</h4>
 
-    <div class="mb-2">
+    <div class="mb-2 text-center">
         <span class="fw-bold text-secondary">Nome:</span>
         <span class="ms-2">{{usuario.nome}}</span>
     </div>
 
-    <div class="mb-2">
+    <div class="mb-2 text-center">
         <span class="fw-bold text-secondary">Login:</span>
         <span class="ms-2">{{usuario.login}}</span>
     </div>
 
-    <div class="mb-2">
+    <div class="mb-2 text-center">
         <span class="fw-bold text-secondary">Tipo:</span>
         <span class="ms-2">{{usuario.tipo}}</span>
     </div>
 
+    {{#if aluno}}
+        <h5 class="mt-5 text-center">Conhecimentos do Usuário</h5>
+        <table class="table table-bordered table-hover mt-3">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Título</th>
+                    <th scope="col">Nível</th>
+                    <th scope="col">Editar</th>
+                    <th scope="col">Excluir</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each usuario.conhecimentos}}
+                <tr>
+                    <td>{{titulo}}</td>
+                    <td>
+                        <span id="nivel-texto-{{id}}">{{nivel}}</span>
 
-    <h5 class="mt-5 text-center">Conhecimentos do Usuário</h5>
-    <table class="table table-bordered table-hover mt-3">
-        <thead class="thead-light">
-            <tr>
-                <th scope="col">Título</th>
-                <th scope="col">Nível</th>
-                <th scope="col">Editar</th>
-                <th scope="col">Excluir</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{#each usuario.conhecimentos}}
-            <tr>
-                <td>{{titulo}}</td>
-                <td>
-                    <span id="nivel-texto-{{id}}">{{nivel}}</span>
+                        <form id="editar-form-{{id}}" class="d-none" action="/editarVinculoConhecimento" method="post">
+                            <input type="hidden" name="conhecimentoId" value="{{id}}">
+                            <input type="hidden" name="usuarioId" value="{{../usuario.id}}">
+                            <input type="number" name="nivel" min="0" max="10" value="{{nivel}}" class="form-control form-control-sm" style="width:80px;">
+                            <button type="submit" class="btn btn-sm btn-success">Salvar</button>
+                        </form>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-warning" onclick="editarNivel({{id}})">Editar</button>
+                    </td>
+                    <td>
+                        <a href="/excluirVinculoConhecimento/{{../usuario.id}}/{{id}}" 
+                            class="btn btn-sm btn-danger" 
+                            onclick="return confirm('Tem certeza que deseja excluir este vínculo?');">
+                            Excluir
+                        </a>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    {{/if}}
 
-                    <form id="editar-form-{{id}}" class="d-none" action="/editarVinculoConhecimento" method="post">
-                        <input type="hidden" name="conhecimentoId" value="{{id}}">
-                        <input type="hidden" name="usuarioId" value="{{../usuario.id}}">
-                        <input type="number" name="nivel" min="0" max="10" value="{{nivel}}" class="form-control form-control-sm" style="width:80px;">
-                        <button type="submit" class="btn btn-sm btn-success">Salvar</button>
-                    </form>
-                </td>
-                <td>
-                    <button type="button" class="btn btn-sm btn-warning" onclick="editarNivel({{id}})">Editar</button>
-                </td>
-                <td>
-                    <a href="/excluirVinculoConhecimento/{{../usuario.id}}/{{id}}" 
-                           class="btn btn-sm btn-danger" 
-                           onclick="return confirm('Tem certeza que deseja excluir este vínculo?');">
-                           Excluir
-                    </a>
-                </td>
-            </tr>
-            {{/each}}
-        </tbody>
-    </table>
+    {{#if aluno}}
+        <h5 class="mt-5 text-center">Projetos do Usuário</h5>
+        <table class="table table-bordered table-hover mt-3">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Link</th>
+                    <th scope="col">Palavras-Chave</th>
+                    <th scope="col">Editar</th>
+                    <th scope="col">Excluir</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each usuario.projetos}}
+                <tr onclick="window.location='/visualizarProjeto/{{id}}'" style="cursor:pointer;">
+                    <td><a>{{nome}}</a></td>
+                    <td>
+                        {{#if link}}
+                            <a href="{{link}}" target="_blank">{{link}}</a>
+                        {{else}}
+                            <span class="text-muted">–</span>
+                        {{/if}}
+                    </td>
+                    <td>{{palavrasChave}}</td>
+                    <td>
+                        <a href="/editarProjeto/{{id}}" class="btn btn-sm btn-warning">Editar</a>
+                    </td>
+                    <td>
+                        <a href="/excluirProjeto/{{id}}" 
+                        class="btn btn-sm btn-danger"
+                        onclick="return confirm('Tem certeza que deseja excluir este projeto?');">
+                        Excluir
+                        </a>
+                    </td>
+                </tr>
+                {{else}}
+                    {{! Mensagem se o usuário não tiver projetos }}
+                    <tr>
+                        <td colspan="5" class="text-center">Nenhum projeto cadastrado.</td>
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    {{/if}}
 
     <a href="/principal" class="btn btn-secondary mt-3">Voltar</a>
 
