@@ -32,6 +32,8 @@ const hbs = handlebars.create({
     add: (a, b) => a + b,
     subtract: (a, b) => a - b,
     eq: (a,b) => a === b,
+    gt: (a, b) => a > b,
+    lt: (a, b) => a < b,
     includes: (array, value) => {
       if (!array) return false;
       return array.includes(value);
