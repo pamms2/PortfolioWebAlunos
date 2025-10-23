@@ -1,4 +1,13 @@
 <div class="container">
+    <div class="col-lg-4 col-md-6">
+    {{#if mensagemErro}}
+        <div class="alert alert-danger" role="alert">
+            {{mensagemErro}}
+        </div>
+    {{/if}}
+    </div>
+</div>
+<div class="container">
         <div class="col-lg-4 col-md-6">
 
             <div class="card shadow-sm">
@@ -23,6 +32,15 @@
             <div class="text-center mt-3">
                 <a href="/principal">Voltar à página principal</a>
             </div>
-            
         </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const alerta = document.getElementById('alerta-erro');
+        if (alerta) {
+            const urlLimpa = window.location.href.split('?')[0];
+            window.history.replaceState({}, document.title, urlLimpa);
+        }
+    });
+</script>
