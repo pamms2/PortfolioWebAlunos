@@ -48,7 +48,7 @@ module.exports = {
 
             if (palavrasChave && palavrasChave.length > 0) {
             const palavrasArray = (Array.isArray(palavrasChave) ? palavrasChave : [palavrasChave])
-                map(Number)
+                .map(Number)
                 .filter(id => !isNaN(id) && id > 0);
 
                 const palavrasUnicas = [...new Set(palavrasArray)];

@@ -97,7 +97,7 @@ route.get("/visualizarProjeto/:id", controllerProjeto.getByProjeto);
 // Controller Palavra-Chave
 route.get('/cadastrarPalavraChave', middleware.requireAdmin, controllerPalavraChave.getCreate);
 route.post('/cadastrarPalavraChave', middleware.requireAdmin, controllerPalavraChave.postCreate);
-route.get('/listarPalavraChave', controllerPalavraChave.getList);
+route.get('/listarPalavraChave', middleware.requireAdmin, controllerPalavraChave.getList);
 route.get('/editarPalavraChave/:id', middleware.requireAdmin, controllerPalavraChave.getUpdate);
 route.post('/editarPalavraChave', middleware.requireAdmin, controllerPalavraChave.postUpdate);
 route.get('/excluirPalavraChave/:id',  middleware.requireAdmin, controllerPalavraChave.getDelete);
