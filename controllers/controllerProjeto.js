@@ -68,52 +68,53 @@ module.exports = {
             const usuarioId = req.session.usuarioId;
             const { busca, palavraChave } = req.query;
             const pagina = parseInt(req.query.pagina, 10) || 1;
-            const limite = 10; 
+            const limite = 10;
             const offset = (pagina - 1) * limite;
 
+            // Filtro de busca
             const where = {};
+            if (busca && busca.trim() !== '') {
+                const termo = `%${busca}%`;
+                where[Op.or] = [
+                    { nome: { [Op.iLike]: termo } },
+                    { link: { [Op.iLike]: termo } }
+                ];
+            }
+
+            // Incluindo usuários e palavras-chave sem filtrar direto no JOIN
             const include = [
                 {
                     model: db.Usuario,
                     as: 'Usuarios',
                     attributes: ['id', 'nome', 'login'],
                     through: { attributes: [] },
-                    required: false 
+                    required: false
                 },
                 {
                     model: db.PalavraChave,
                     as: 'PalavrasChave',
                     attributes: ['id', 'palavra'],
                     through: { attributes: [] },
-                    required: false 
+                    required: false
                 }
             ];
-
-            if (busca && busca.trim() !== '') {
-                const termo = `%${busca}%`;
-
-                where[Op.or] = [
-                    { nome: { [Op.iLike]: termo } },
-                    { '$Usuarios.nome$': { [Op.iLike]: termo } },
-                    { link: { [Op.iLike]: termo } }
-                ];
-            }
-
-            if (palavraChave && palavraChave !== '') {
-                include[1].where = { id: Number(palavraChave) };
-                include[1].required = true; 
-            }
 
             const { rows: projetos, count: totalItens } = await db.Projeto.findAndCountAll({
                 where,
                 include,
                 order: [['nome', 'ASC']],
-                distinct: true, 
+                distinct: true,
                 limit: limite,
-                offset,
-                col: 'id',
-                subQuery: false
+                offset
             });
+
+            let projetosFiltrados = projetos;
+            if (palavraChave && palavraChave !== '') {
+                const palavraId = Number(palavraChave);
+                projetosFiltrados = projetos.filter(p =>
+                    p.PalavrasChave.some(pc => pc.id === palavraId)
+                );
+            }
 
             const palavras = (await db.PalavraChave.findAll({
                 order: [['palavra', 'ASC']],
@@ -122,7 +123,7 @@ module.exports = {
 
             const totalPaginas = Math.ceil(totalItens / limite);
 
-            const projetosFormatados = projetos.map(p => {
+            const projetosFormatados = projetosFiltrados.map(p => {
                 const proj = p.toJSON();
                 proj.palavrasChave = proj.PalavrasChave?.map(pc => pc.palavra).join(', ') || '';
                 proj.desenvolvedores = proj.Usuarios?.map(u => u.nome).join(', ') || '';
@@ -135,7 +136,6 @@ module.exports = {
                 palavras,
                 filtroBusca: busca || '',
                 filtroPalavra: palavraChave || '',
-
                 paginaAtual: pagina,
                 totalPaginas
             });
