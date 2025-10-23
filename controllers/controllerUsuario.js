@@ -5,7 +5,17 @@ const bcrypt = require('bcryptjs');
 module.exports = {
     //renderiza a página de login
     async getLogin(req, res) {
-        res.render('usuario/login', {layout: 'noMenu.handlebars'});
+        
+        const{erro} = req.query;
+        let mensagemErro = null;
+
+        if(erro === 'usuario'){
+            mensagemErro = 'Usuário não encontrado.';
+        }else if(erro === 'senha'){
+            mensagemErro = 'Senha incorreta.';
+        }
+        
+        res.render('usuario/login', {layout: 'noMenu.handlebars', mensagemErro: mensagemErro});
     },
 
     //desconexão da conta
@@ -27,14 +37,14 @@ module.exports = {
             //usuário não encontrado
             if(!usuario) {
                 console.log('Usuário não encontrado');
-                return res.redirect('/');
+                return res.redirect('/login?erro=usuario');
             }
 
             const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
 
             if (!senhaCorreta) {
                 console.log('Senha incorreta');
-                return res.redirect('/');
+                return res.redirect('/login?erro=senha');
             }
 
             //login bem-sucedido
@@ -54,7 +64,7 @@ module.exports = {
             res.render('home');
         } catch (err) {
             console.error('Erro no login:', err);
-            res.render('/');
+            res.render('/login');
         }
     },
 

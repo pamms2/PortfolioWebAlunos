@@ -32,26 +32,27 @@ module.exports = {
             
             const projeto = await db.Projeto.create({ nome, resumo, link });
             const usuarioId = req.session.usuarioId;
-            const desenvolvedores = [usuarioId];
+            
+            let desenvolvedores = [usuarioId];
 
             if (alunosId) {
                 const ids = Array.isArray(alunosId)
                     ? alunosId.map(Number).filter(id => !isNaN(id) && id > 0)
                     : [Number(alunosId)].filter(id => !isNaN(id) && id > 0);
 
-                for (let id of ids) {
-                    if (!desenvolvedores.includes(id)) desenvolvedores.push(id);
-                }
+                const idsUnicos = new Set([...desenvolvedores, ...ids]);
+                desenvolvedores = [...idsUnicos]
             }
 
             await projeto.setUsuarios(desenvolvedores);
 
             if (palavrasChave && palavrasChave.length > 0) {
-            const palavrasArray = Array.isArray(palavrasChave)
-                ? palavrasChave.map(Number)
-                : [Number(palavrasChave)];
+            const palavrasArray = (Array.isArray(palavrasChave) ? palavrasChave : [palavrasChave])
+                map(Number)
+                .filter(id => !isNaN(id) && id > 0);
 
-            await projeto.setPalavrasChave(palavrasArray);
+                const palavrasUnicas = [...new Set(palavrasArray)];
+                await projeto.setPalavrasChave(palavrasArray);
             }
 
             res.redirect('/visualizarProjeto/' + projeto.id);

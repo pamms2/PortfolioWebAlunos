@@ -154,5 +154,59 @@ document.addEventListener('DOMContentLoaded', function() {
   // inicializa o primeiro campo
   configurarAutoComplete(document.querySelector('.aluno-input'));
   atualizarBotoesAlunos();
+
+  const form = document.querySelector('form[action="/cadastrarProjeto"]');
+
+
+  form.addEventListener('submit', function(event) {
+      // --- Validação de Palvaras Duplicada ---
+      const palavrasContainer = document.getElementById('palavras-container');
+      const selectsPalavras = palavrasContainer.querySelectorAll('select[name="palavrasChave[]"]');
+
+      const valoresPalavras = new Set();
+      let temDuplicataPalavra = false;
+
+      selectsPalavras.forEach(select => {
+          const valor = select.value;
+          // Ignora o "Selecione..." (valor vazio)
+          if (valor) { 
+              if (valoresPalavras.has(valor)) {
+                  temDuplicataPalavra = true;
+              }
+              valoresPalavras.add(valor);
+          }
+      });
+
+      // Se encontrou duplicata, MOSTRA O ALERTA e PARA O ENVIO
+      if (temDuplicataPalavra) {
+          alert('Erro: Você não pode adicionar a mesma palavra-chave mais de uma vez. Por favor, remova as duplicatas.');
+          event.preventDefault();
+          return;
+      }
+
+      // --- Validação de Alunos Duplicado ---
+      const alunosContainer = document.getElementById('alunos-container');
+      const selectsAlunos = alunosContainer.querySelectorAll('input[name="alunosId[]"]');
+
+      const valoresAlunos = new Set();
+      let temDuplicataAluno = false;
+
+      selectsAlunos.forEach(input => {
+          const valor = input.value;
+          if (valor) { 
+              if (valoresAlunos.has(valor)) {
+                  temDuplicataAluno = true;
+              }
+              valoresAlunos.add(valor);
+          }
+      });
+
+      if (temDuplicataAluno) {
+          alert('Erro: Você não pode adicionar o mesmo desenvolvedor mais de uma vez. Por favor, remova as duplicatas.');
+          event.preventDefault();
+          return;
+      }
+  });
+
 });
 </script>
